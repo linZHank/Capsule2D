@@ -42,6 +42,7 @@ class TriPullerEnv(gym.Env):
         self.target_coord_cartesian = np.array([target_rho*np.cos(target_theta), target_rho*np.sin(target_theta)])
         self.catcher_coord_pole = np.zeros(2)
         self.catcher_coord_cartesian = np.zeros(2)
+        self.traj_catcher = [self.catcher_coord_cartesian.copy()]
         self.prev_dist = target_rho
 
         return self.target_coord_pole 
@@ -49,6 +50,7 @@ class TriPullerEnv(gym.Env):
     def step(self, action):
         done = False
         info = ''
+        # compute catcher's location change
         vec_c2p = self.puller_locations - self.catcher_coord_cartesian
         deltas = vec_c2p/np.linalg.norm(vec_c2p)*np.expand_dims(np.array(action), axis=1)*0.02
         resolved_delta  = np.sum(deltas, axis=0) # resolved delta
@@ -60,6 +62,7 @@ class TriPullerEnv(gym.Env):
         vec_c2t = self.target_coord_cartesian - self.catcher_coord_cartesian
         dist = np.linalg.norm(vec_c2t) # catcher-target distance
         ang = np.arctan2(vec_c2t[1], vec_c2t[0]) # catcher-target angle
+        self.traj_catcher.append(self.catcher_coord_cartesian.copy())
         # compute reward
         reward = self.prev_dist - dist
         self.prev_dist = dist
@@ -103,26 +106,27 @@ class TriPullerEnv(gym.Env):
         self.ax.plot(
             [self.catcher_coord_cartesian[0],self.puller_locations[0,0]], 
             [self.catcher_coord_cartesian[1],self.puller_locations[0,1]],
-            linestyle=':',
+            linewidth=.1,
             color='k'
         )
         self.ax.plot(
             [self.catcher_coord_cartesian[0],self.puller_locations[1,0]], 
             [self.catcher_coord_cartesian[1],self.puller_locations[1,1]],
-            linestyle=':',
+            linewidth=.1,
             color='k'
         )
         self.ax.plot(
             [self.catcher_coord_cartesian[0],self.puller_locations[2,0]], 
             [self.catcher_coord_cartesian[1],self.puller_locations[2,1]],
-            linestyle=':',
+            linewidth=.1,
             color='k'
         )
+        # plot catcher's trajectory
+        traj_c = np.array(self.traj_catcher)
+        self.ax.plot(traj_c[:,0], traj_c[:,1], linestyle=':', linewidth=0.5, color='black')
         # Set ax
         self.ax.axis(np.array([-1.2, 1.2, -1., 1.4]))
         plt.pause(0.02)
         self.fig.show()
 
 
-# def reset(self):
-# def close(self):
