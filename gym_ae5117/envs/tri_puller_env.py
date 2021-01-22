@@ -20,19 +20,13 @@ class TriPullerEnv(gym.Env):
                                           spaces.Discrete(2),
                                           spaces.Discrete(2)))
 
-        self.fixed_patches = []
+        self.puller_locations = np.zeros((3,2))
         for i in range(3):
-            bot_patch = Rectangle(xy=(np.cos(np.pi/2+2*np.pi/3*i)-.05, np.sin(np.pi/2+2*np.pi/3*i)-.05),
-                                  width=.1,
-                                  height=.1)
-            self.fixed_patches.append(bot_patch)
-        bound_patch = RegularPolygon(xy=(0,0),
-                                     numVertices=3,
-                                     radius=1,
-                                     fill=False)
-        self.fixed_patches.append(bound_patch)
+            self.puller_locations[i] = np.array([np.cos(np.pi/2+2*np.pi/3*i), np.sin(np.pi/2+2*np.pi/3*i)])
         self.fig = plt.figure(figsize=(10,10))
         self.ax = self.fig.add_subplot(111)
+        # parameters
+        self.max_episode_steps = 100
             
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -44,23 +38,65 @@ class TriPullerEnv(gym.Env):
         while target_rho<=.05:
             target_rho = np.random.uniform(0, 1)
         target_theta = np.random.uniform(-np.pi, np.pi)
-        state = np.array([target_rho, target_theta])
-        self.target_patch = RegularPolygon(xy=(target_rho*np.cos(target_theta), target_rho*np.sin(target_theta)),
-                                     numVertices=6,
-                                     radius=.03,
-                                     fc='salmon')
-        self.catcher_patch = Circle(xy=(0,0),
-                                     radius=.03,
-                                     fc='black')
+        self.target_coord_pole = np.array([target_rho, target_theta])
+        self.target_coord_cartesian = np.array([target_rho*np.cos(target_theta), target_rho*np.sin(target_theta)])
+        self.catcher_coord_pole = np.zeros(2)
+        self.catcher_coord_cartesian = np.zeros(2)
+        self.prev_dist = target_rho
 
-        return state
- 
+        return self.target_coord_pole 
         
+    def step(self, action):
+        done = False
+        info = ''
+        vec_c2p = self.puller_locations - self.catcher_coord_cartesian
+        deltas = vec_c2p/np.linalg.norm(vec_c2p)*np.expand_dims(np.array(action), axis=1)*0.02
+        resolved_delta  = np.sum(deltas, axis=0) # resolved delta
+        self.catcher_coord_cartesian += resolved_delta
+        self.catcher_coord_pole = np.array([
+            np.linalg.norm(self.catcher_coord_cartesian), 
+            np.arctan2(self.catcher_coord_cartesian[1], self.catcher_coord_cartesian[0])
+        ])
+        vec_c2t = self.target_coord_cartesian - self.catcher_coord_cartesian
+        dist = np.linalg.norm(vec_c2t) # catcher-target distance
+        ang = np.arctan2(vec_c2t[1], vec_c2t[0]) # catcher-target angle
+        # compute reward
+        reward = self.prev_dist - dist
+        self.prev_dist = dist
+        # Check episode done condition
+        self.step_counter += 1
+        if self.step_counter >= self.max_episode_steps:
+            done = True
+        if dist<=0.01:
+            reward = 100
+            done = True
+            info = '\n!!!!\nTarget Caught\n!!!!\n'
+
+        return np.array([dist, ang]), reward, done, info
 
     def render(self, mode='human'):
         self.ax = self.fig.get_axes()[0]
         self.ax.cla()
-        pc = PatchCollection(self.fixed_patches+[self.target_patch]+[self.catcher_patch], match_original=True) # match_origin prevent PatchCollection mess up original color
+        patch_list = []
+        bpat = RegularPolygon(xy=(0,0), numVertices=3, radius=1, fill=False)
+        patch_list.append(bpat)
+        for i in range(3):
+            ppat = Rectangle(xy=self.puller_locations[i]-.05, width=.1, height=.1, fc='gray')
+            patch_list.append(ppat)
+        tpat = RegularPolygon(
+            xy=(self.target_coord_cartesian[0], self.target_coord_cartesian[1]),
+            numVertices=6,
+            radius=.04,
+            fc='salmon'
+        )
+        patch_list.append(tpat)
+        cpat = Circle(
+            xy=(self.catcher_coord_cartesian[0], self.catcher_coord_cartesian[1]), 
+            radius=.03, 
+            fc='black'
+        )
+        patch_list.append(cpat)
+        pc = PatchCollection(patch_list, match_original=True) # match_origin prevent PatchCollection mess up original color
         self.ax.add_collection(pc)
         # Set ax
         self.ax.axis(np.array([-1.2, 1.2, -1., 1.4]))
@@ -68,7 +104,5 @@ class TriPullerEnv(gym.Env):
         self.fig.show()
 
 
-# def step(self, action):
 # def reset(self):
-# def render(self, mode='human'):
 # def close(self):
