@@ -97,7 +97,27 @@ class TriPullerEnv(gym.Env):
         )
         patch_list.append(cpat)
         pc = PatchCollection(patch_list, match_original=True) # match_origin prevent PatchCollection mess up original color
+        # plot patches
         self.ax.add_collection(pc)
+        # plot cables
+        self.ax.plot(
+            [self.catcher_coord_cartesian[0],self.puller_locations[0,0]], 
+            [self.catcher_coord_cartesian[1],self.puller_locations[0,1]],
+            linestyle=':',
+            color='k'
+        )
+        self.ax.plot(
+            [self.catcher_coord_cartesian[0],self.puller_locations[1,0]], 
+            [self.catcher_coord_cartesian[1],self.puller_locations[1,1]],
+            linestyle=':',
+            color='k'
+        )
+        self.ax.plot(
+            [self.catcher_coord_cartesian[0],self.puller_locations[2,0]], 
+            [self.catcher_coord_cartesian[1],self.puller_locations[2,1]],
+            linestyle=':',
+            color='k'
+        )
         # Set ax
         self.ax.axis(np.array([-1.2, 1.2, -1., 1.4]))
         plt.pause(0.02)
