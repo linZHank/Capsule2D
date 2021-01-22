@@ -20,12 +20,17 @@ class TriPullerEnv(gym.Env):
                                           spaces.Discrete(2),
                                           spaces.Discrete(2)))
 
-        self.bot_patches = []
+        self.fixed_patches = []
         for i in range(3):
             bot_patch = Rectangle(xy=(np.cos(np.pi/2+2*np.pi/3*i)-.05, np.sin(np.pi/2+2*np.pi/3*i)-.05),
                                   width=.1,
                                   height=.1)
-            self.bot_patches.append(bot_patch)
+            self.fixed_patches.append(bot_patch)
+        bound_patch = RegularPolygon(xy=(0,0),
+                                     numVertices=3,
+                                     radius=1,
+                                     fill=False)
+        self.fixed_patches.append(bound_patch)
         self.fig = plt.figure(figsize=(10,10))
         self.ax = self.fig.add_subplot(111)
             
@@ -34,15 +39,31 @@ class TriPullerEnv(gym.Env):
         return [seed]
 
     def reset(self):
-        pass
+        self.step_counter = 0
+        target_rho = np.random.uniform(0,1)
+        while target_rho<=.05:
+            target_rho = np.random.uniform(0, 1)
+        target_theta = np.random.uniform(-np.pi, np.pi)
+        state = np.array([target_rho, target_theta])
+        self.target_patch = RegularPolygon(xy=(target_rho*np.cos(target_theta), target_rho*np.sin(target_theta)),
+                                     numVertices=6,
+                                     radius=.03,
+                                     fc='salmon')
+        self.catcher_patch = Circle(xy=(0,0),
+                                     radius=.03,
+                                     fc='black')
+
+        return state
+ 
+        
 
     def render(self, mode='human'):
         self.ax = self.fig.get_axes()[0]
         self.ax.cla()
-        pc = PatchCollection(self.bot_patches, match_original=True) # match_origin prevent PatchCollection mess up original color
+        pc = PatchCollection(self.fixed_patches+[self.target_patch]+[self.catcher_patch], match_original=True) # match_origin prevent PatchCollection mess up original color
         self.ax.add_collection(pc)
         # Set ax
-        self.ax.axis(np.array([-1.1, 1.1, -.75, 1.1]))
+        self.ax.axis(np.array([-1.2, 1.2, -1., 1.4]))
         plt.pause(0.02)
         self.fig.show()
 
