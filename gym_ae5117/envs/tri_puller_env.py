@@ -15,7 +15,7 @@ class TriPullerEnv(gym.Env):
         self.viewer = None
         self.prev_reward = None
 
-        self.observation_space = spaces.Box(low=-1., high=1., shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.pi, high=np.pi, shape=(2,), dtype=np.float32)
         self.action_space = spaces.Tuple((spaces.Discrete(2),
                                           spaces.Discrete(2),
                                           spaces.Discrete(2)))
@@ -91,7 +91,7 @@ class TriPullerEnv(gym.Env):
             xy=(self.target_coord_cartesian[0], self.target_coord_cartesian[1]),
             numVertices=6,
             radius=.04,
-            fc='salmon'
+            fc='darkorange'
         )
         patch_list.append(tpat)
         cpat = Circle(
@@ -131,3 +131,11 @@ class TriPullerEnv(gym.Env):
         self.fig.show()
 
 
+# Uncomment following to test env
+env = TriPullerEnv()
+env.reset()
+for _ in range(200):
+    env.render()
+    o,r,d,i = env.step([0,0,1])
+    # o,r,d,i = env.step(np.random.randint(0,2,(3)))
+    print(o)
