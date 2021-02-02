@@ -52,7 +52,8 @@ class TriPullerEnv(gym.Env):
         info = ''
         # compute catcher's location change
         vec_c2p = self.puller_locations - self.catcher_coord_cartesian
-        deltas = vec_c2p/np.linalg.norm(vec_c2p)*np.expand_dims(np.array(action), axis=1)*0.02
+        unit = vec_c2p/np.expand_dims(np.linalg.norm(vec_c2p, axis=1), axis=1)
+        deltas = unit*np.expand_dims(np.array(action), axis=1)*0.02
         resolved_delta  = np.sum(deltas, axis=0) # resolved delta
         self.catcher_coord_cartesian += resolved_delta
         self.catcher_coord_pole = np.array([
