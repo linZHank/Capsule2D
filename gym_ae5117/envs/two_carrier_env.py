@@ -37,12 +37,12 @@ class TwoCarrierEnv(gym.Env):
         # prepare render
         self.fig = plt.figure(figsize=(10,10))
         self.ax = self.fig.add_subplot(111)
-        self.nwwpat = Rectangle(xy=(-5,5), width=4.6, height=.5, fc='gray')
-        self.newpat = Rectangle(xy=(.4,5), width=4.6, height=.5, fc='gray')
-        self.wwpat = Rectangle(xy=(-5.5,-.5), width=.5, height=6, fc='gray')
-        self.ewpat = Rectangle(xy=(5,-.5), width=.5, height=6, fc='gray')
-        self.swpat = Rectangle(xy=(-5,-.5), width=10, height=.5, fc='gray')
-        self.wall_patches = [self.nwwpat, self.newpat, self.wwpat, self.ewpat, self.swpat]
+        nwwpat = Rectangle(xy=(-5.5,5), width=5.1, height=.5, fc='gray')
+        newpat = Rectangle(xy=(.4,5), width=5.1, height=.5, fc='gray')
+        wwpat = Rectangle(xy=(-5.5,-.5), width=.5, height=6, fc='gray')
+        ewpat = Rectangle(xy=(5,-.5), width=.5, height=6, fc='gray')
+        swpat = Rectangle(xy=(-5.5,-.5), width=11, height=.5, fc='gray')
+        self.wall_patches = [nwwpat, newpat, wwpat, ewpat, swpat]
             
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -70,6 +70,9 @@ class TwoCarrierEnv(gym.Env):
         done = False
         info = ''
         reward = 0
+        prev_rod = self.rod_pose.copy()
+        prev_c0 = self.c0_position.copy()
+        prev_c1 = self.c1_position.copy()
         # compute rod's displacement and rotation
         disp = self.action_codebook[action[0]] + self.action_codebook[action[1]]
         rot = 0.
@@ -87,13 +90,37 @@ class TwoCarrierEnv(gym.Env):
             self.rod_pose[0]-.5*np.cos(self.rod_pose[-1]), 
             self.rod_pose[1]-.5*np.sin(self.rod_pose[-1])
         ])
+        # restrict angle in (-pi,pi)
+        if np.pi<self.rod_pose[-1]<=2*np.pi:
+            self.rod_pose[-1] -= 2*np.pi 
+        elif -np.pi>self.rod_pose[-1]>=-2*np.pi:
+            self.rod_pose[-1] += 2*np.pi
+        # compute reward
+        uvec_vert = np.array([0., 1.]) # unit vertical vector
+        uvec_prod = (prev_c0-prev_c1)/np.linalg.norm(prev_c0-prev_c1) # unit vector of previous rod
+        uvec_rod = (self.c0_position-self.c1_position)/np.linalg.norm(self.c0_position-self.c1_position) # unit vector of current rod
+        prev_vertang = np.arccos(np.dot(uvec_vert, uvec_prod)) # angle between previous rod and vertical vector
+        if prev_vertang>np.pi/2:
+            prev_vertang = np.pi-prev_vertang # restrict angle to (0, pi/2)
+        vertang = np.arccos(np.dot(uvec_vert, uvec_rod)) # angle between current rod and vertical vector
+        if vertang>np.pi/2:
+            vertang = np.pi-vertang
+        reward = 100*(np.abs(prev_rod[0])-np.abs(self.rod_pose[0])) + \
+            100*(self.rod_pose[1]-prev_rod[1]) + \
+            100*(prev_vertang-vertang) 
+        
         # check crash
         rod_points = np.linspace(self.c0_position, self.c1_position, 50)
         for p in self.wall_patches:
-            if np.sum(p.contains_points(rod_points, radius=.001))>0:
+            if np.sum(p.contains_points(rod_points, radius=.001)):
                 done = True
                 info = 'crash wall'
                 break
+        # check escape
+        if self.c0_position[1]>5.5 and self.c1_position[1]>5.5:
+            reward = 100
+            done = True
+            info = 'escaped'
 
         return self.rod_pose, reward, done, info
 
