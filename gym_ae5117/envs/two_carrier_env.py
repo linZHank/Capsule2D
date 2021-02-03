@@ -37,6 +37,12 @@ class TwoCarrierEnv(gym.Env):
         # prepare render
         self.fig = plt.figure(figsize=(10,10))
         self.ax = self.fig.add_subplot(111)
+        self.nwwpat = Rectangle(xy=(-5,5), width=4.6, height=.5, fc='gray')
+        self.newpat = Rectangle(xy=(.4,5), width=4.6, height=.5, fc='gray')
+        self.wwpat = Rectangle(xy=(-5.5,-.5), width=.5, height=6, fc='gray')
+        self.ewpat = Rectangle(xy=(5,-.5), width=.5, height=6, fc='gray')
+        self.swpat = Rectangle(xy=(-5,-.5), width=10, height=.5, fc='gray')
+        self.wall_patches = [self.nwwpat, self.newpat, self.wwpat, self.ewpat, self.swpat]
             
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -81,6 +87,13 @@ class TwoCarrierEnv(gym.Env):
             self.rod_pose[0]-.5*np.cos(self.rod_pose[-1]), 
             self.rod_pose[1]-.5*np.sin(self.rod_pose[-1])
         ])
+        # check crash
+        rod_points = np.linspace(self.c0_position, self.c1_position, 50)
+        for p in self.wall_patches:
+            if np.sum(p.contains_points(rod_points, radius=.001))>0:
+                done = True
+                info = 'crash wall'
+                break
 
         return self.rod_pose, reward, done, info
 
@@ -88,13 +101,8 @@ class TwoCarrierEnv(gym.Env):
         self.ax = self.fig.get_axes()[0]
         self.ax.cla()
         patch_list = []
-        # patches
-        bbpat = Rectangle(xy=(-5,0), width=10, height=6.5, fill=False, ec='black') # bounding box
-        patch_list.append(bbpat)
-        lwpat = Rectangle(xy=(-5,5), width=4.7, height=.5, fc='gray')
-        patch_list.append(lwpat)
-        rwpat = Rectangle(xy=(.3,5), width=4.7, height=.5, fc='gray')
-        patch_list.append(rwpat)
+        patch_list += self.wall_patches
+        # add wall patches
         c0pat = Circle(
             xy=(self.c0_position[0], self.c0_position[-1]), 
             radius=.1, 
@@ -119,7 +127,7 @@ class TwoCarrierEnv(gym.Env):
         )
         # plot trajectory
         # Set ax
-        self.ax.axis(np.array([-5.1, 5.1, -.1, 6.6]))
+        self.ax.axis(np.array([-5.6, 5.6, -.6, 6.6]))
         plt.pause(0.02)
         self.fig.show()
 
@@ -127,7 +135,9 @@ class TwoCarrierEnv(gym.Env):
 # Uncomment following to test env
 env = TwoCarrierEnv()
 env.reset()
-for _ in range(2000):
+for _ in range(1000):
     env.render()
     o,r,d,i = env.step(np.random.randint(0,4,(2)))
-    print(o)
+    print(o, r, d, i)
+    if d:
+        break

@@ -56,6 +56,12 @@ class TriPullerEnv(gym.Env):
         deltas = unit*np.expand_dims(np.array(action), axis=1)*0.02
         resolved_delta  = np.sum(deltas, axis=0) # resolved delta
         self.catcher_coord_cartesian += resolved_delta
+        if self.catcher_coord_cartesian[0] < np.cos(-5*np.pi/6):
+            self.catcher_coord_cartesian[0] = np.cos(-5*np.pi/6)
+        elif self.catcher_coord_cartesian[0] > np.cos(-np.pi/6):
+            self.catcher_coord_cartesian[0] = np.cos(-np.pi/6)
+        if self.catcher_coord_cartesian[1] > 1.:
+            self.catcher_coord_cartesian[1] = 1.
         self.catcher_coord_pole = np.array([
             np.linalg.norm(self.catcher_coord_cartesian), 
             np.arctan2(self.catcher_coord_cartesian[1], self.catcher_coord_cartesian[0])
@@ -136,6 +142,6 @@ env = TriPullerEnv()
 env.reset()
 for _ in range(200):
     env.render()
-    o,r,d,i = env.step([0,0,1])
+    o,r,d,i = env.step([1,0,0])
     # o,r,d,i = env.step(np.random.randint(0,2,(3)))
     print(o)
