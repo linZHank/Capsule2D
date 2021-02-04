@@ -24,6 +24,7 @@ sudo apt install python3-dev python3-pip git
 
 ## Quick Start
 ### TriPuller-v0
+![TriPuller](https://github.com/IRASatUC/gym-ae5117/blob/main/images/TriPuller.png)
 ```python
 import gym
 env = gym.make('gym_ae5117:TriPuller-v0')
@@ -34,6 +35,7 @@ for _ in range(100):
 ```
 
 ### TwoCarrier-v0
+![TwoCarrier](https://github.com/IRASatUC/gym-ae5117/blob/main/images/TwoCarrier.png)
 ```python
 import gym
 env = gym.make('gym_ae5117:TwoCarrier-v0')
