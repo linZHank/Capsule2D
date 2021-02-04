@@ -138,10 +138,10 @@ class TriPullerEnv(gym.Env):
 
 
 # Uncomment following to test env
-env = TriPullerEnv()
-env.reset()
-for _ in range(env.max_episode_steps):
-    env.render()
-    # o,r,d,i = env.step([1,0,0])
-    o,r,d,i = env.step(np.random.randint(0,2,(3)))
-    print(o)
+# env = TriPullerEnv()
+# env.reset()
+# for _ in range(env.max_episode_steps):
+#     env.render()
+#     # o,r,d,i = env.step([1,0,0])
+#     o,r,d,i = env.step(np.random.randint(0,2,(3)))
+#     print(o)

@@ -170,12 +170,12 @@ class TwoCarrierEnv(gym.Env):
 
 
 # Uncomment following to test env
-env = TwoCarrierEnv()
-env.reset()
-for _ in range(1000):
-    env.render()
-    o,r,d,i = env.step(np.random.randint(0,4,(2)))
-    # o,r,d,i = env.step([0,1])
-    print(o, r, d, i)
-    if d:
-        break
+# env = TwoCarrierEnv()
+# env.reset()
+# for _ in range(1000):
+#     env.render()
+#     o,r,d,i = env.step(np.random.randint(0,4,(2)))
+#     # o,r,d,i = env.step([0,1])
+#     print(o, r, d, i)
+#     if d:
+#         break
