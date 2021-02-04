@@ -14,7 +14,7 @@ class TwoCarrierEnv(gym.Env):
         self.seed()
         self.viewer = None
         self.prev_reward = None
-
+        self.max_episode_steps = 1000
         self.observation_space = spaces.Box(low=-10., high=10., shape=(3,), dtype=np.float32)
         self.action_space = spaces.Tuple((spaces.Discrete(4), spaces.Discrete(4))) # ^v<>
         self.action_codebook = np.array([
@@ -33,8 +33,9 @@ class TwoCarrierEnv(gym.Env):
             self.rod_pose[0]-.5*np.cos(self.rod_pose[-1]), 
             self.rod_pose[1]-.5*np.sin(self.rod_pose[-1])
         ])
-        self.max_episode_steps = 1000
-        # prepare render
+        self.c0_traj = []
+        self.c1_traj = []
+        # prepare renderer
         self.fig = plt.figure(figsize=(10,10))
         self.ax = self.fig.add_subplot(111)
         nwwpat = Rectangle(xy=(-5.5,5), width=5.1, height=.5, fc='gray')
@@ -63,8 +64,8 @@ class TwoCarrierEnv(gym.Env):
             self.rod_pose[0]-.5*np.cos(self.rod_pose[-1]), 
             self.rod_pose[1]-.5*np.sin(self.rod_pose[-1])
         ])
-        self.c0_traj = [self.c0_position.copy()]
-        self.c1_traj = [self.c1_position.copy()]
+        self.c0_traj.append(self.c0_position.copy())
+        self.c1_traj.append(self.c1_position.copy())
 
         return self.rod_pose 
         
@@ -159,10 +160,11 @@ class TwoCarrierEnv(gym.Env):
             color='darkorange'
         )
         # plot trajectory
-        traj_c0 = np.array(self.c0_traj)
-        traj_c1 = np.array(self.c1_traj)
-        self.ax.plot(traj_c0[-100:,0], traj_c0[-100:,1], linestyle=':', linewidth=0.5, color='black')
-        self.ax.plot(traj_c1[-100:,0], traj_c1[-100:,1], linestyle=':', linewidth=0.5, color='black')
+        if self.c0_traj and self.c0_traj:
+            traj_c0 = np.array(self.c0_traj)
+            traj_c1 = np.array(self.c1_traj)
+            self.ax.plot(traj_c0[-100:,0], traj_c0[-100:,1], linestyle=':', linewidth=0.5, color='black')
+            self.ax.plot(traj_c1[-100:,0], traj_c1[-100:,1], linestyle=':', linewidth=0.5, color='black')
         # Set ax
         self.ax.axis(np.array([-5.6, 5.6, -.6, 6.6]))
         plt.pause(0.02)
@@ -172,7 +174,7 @@ class TwoCarrierEnv(gym.Env):
 # Uncomment following to test env
 # env = TwoCarrierEnv()
 # env.reset()
-# for _ in range(1000):
+# for _ in range(env.max_episode_steps):
 #     env.render()
 #     o,r,d,i = env.step(np.random.randint(0,4,(2)))
 #     # o,r,d,i = env.step([0,1])

@@ -14,19 +14,29 @@ class TriPullerEnv(gym.Env):
         self.seed()
         self.viewer = None
         self.prev_reward = None
-
+        self.max_episode_steps = 200
         self.observation_space = spaces.Box(low=-np.pi, high=np.pi, shape=(2,), dtype=np.float32)
         self.action_space = spaces.Tuple((spaces.Discrete(2),
                                           spaces.Discrete(2),
                                           spaces.Discrete(2)))
-
         self.puller_locations = np.zeros((3,2))
         for i in range(3):
             self.puller_locations[i] = np.array([np.cos(np.pi/2+2*np.pi/3*i), np.sin(np.pi/2+2*np.pi/3*i)])
+        self.traj_catcher = []
+        # vars
+        self.target_coord_pole = np.zeros(2)
+        self.target_coord_cartesian = np.zeros(2)
+        self.catcher_coord_pole = np.zeros(2)
+        self.catcher_coord_cartesian = np.zeros(2)
+        # prepare renderer
         self.fig = plt.figure(figsize=(10,10))
         self.ax = self.fig.add_subplot(111)
-        # parameters
-        self.max_episode_steps = 200
+        self.fixed_patches = []
+        for i in range(3):
+            ppat = Rectangle(xy=self.puller_locations[i]-.05, width=.1, height=.1, fc='gray') # pullers
+            self.fixed_patches.append(ppat)
+        bbpat = RegularPolygon(xy=(0,0), numVertices=3, radius=1, fill=False) # bounding box
+        self.fixed_patches.append(bbpat)
             
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -88,23 +98,19 @@ class TriPullerEnv(gym.Env):
         self.ax = self.fig.get_axes()[0]
         self.ax.cla()
         patch_list = []
-        bpat = RegularPolygon(xy=(0,0), numVertices=3, radius=1, fill=False)
-        patch_list.append(bpat)
-        for i in range(3):
-            ppat = Rectangle(xy=self.puller_locations[i]-.05, width=.1, height=.1, fc='gray')
-            patch_list.append(ppat)
+        patch_list += self.fixed_patches
         tpat = RegularPolygon(
             xy=(self.target_coord_cartesian[0], self.target_coord_cartesian[1]),
             numVertices=6,
             radius=.04,
             fc='darkorange'
-        )
+        ) # target
         patch_list.append(tpat)
         cpat = Circle(
             xy=(self.catcher_coord_cartesian[0], self.catcher_coord_cartesian[1]), 
             radius=.03, 
             fc='black'
-        )
+        ) # catcher
         patch_list.append(cpat)
         pc = PatchCollection(patch_list, match_original=True) # match_origin prevent PatchCollection mess up original color
         # plot patches
@@ -129,8 +135,9 @@ class TriPullerEnv(gym.Env):
             color='k'
         )
         # plot catcher's trajectory
-        traj_c = np.array(self.traj_catcher)
-        self.ax.plot(traj_c[-100:,0], traj_c[-100:,1], linestyle=':', linewidth=0.5, color='black')
+        if self.traj_catcher:
+            traj_c = np.array(self.traj_catcher)
+            self.ax.plot(traj_c[-100:,0], traj_c[-100:,1], linestyle=':', linewidth=0.5, color='black')
         # Set ax
         self.ax.axis(np.array([-1.2, 1.2, -1., 1.4]))
         plt.pause(0.02)
