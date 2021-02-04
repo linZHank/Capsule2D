@@ -1,7 +1,9 @@
 # gym-ae5117
-This repo provides two training environment for **AE5117: Intelligent Robotics**. Both consider kinematics only.
+This repo provides two training environment for **AE5117: Intelligent Robotics**'s course project. 
 - TriPuller-v0
 - TwoCarrier-v0
+The environments are built under the [OpenAI Gym](https://github.com/openai/gym)'s framework. Both consider kinematics only. Current environments were tested under **Ubuntu 18.04** and **macOS Mojave**.
+
 # Installation
 ## Pre-requisites
 - [Python3](https://www.python.org/)
@@ -14,10 +16,11 @@ sudo apt install python3-dev python3-pip git
 ```
 ## Installation
 1. Bring up a terminal console  
-2. `cd desired_directory`
+2. `cd` *`desired_directory/`* 
 3. `git clone https://github.com/IRASatUC/gym-ae5117.git`
 4. `cd gym-ae5117`
 5. `pip install -e .`
+> May update installation guide for Windows and Mac. 
 
 ## Quick Start
 ### TriPuller-v0
