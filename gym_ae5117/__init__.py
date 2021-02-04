@@ -1,8 +1,8 @@
 from gym.envs.registration import register
 
 register(
-    id='ThreePuller-v0',
-    entry_point='gym_ae5117.envs:ThreePullerEnv',
+    id='TriPuller-v0',
+    entry_point='gym_ae5117.envs:TriPullerEnv',
     timestep_limit=100,
     nondeterministic=True
 )

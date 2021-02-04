@@ -7,7 +7,7 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 
-class ThreePullerEnv(gym.Env):
+class TriPullerEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
@@ -138,7 +138,7 @@ class ThreePullerEnv(gym.Env):
 
 
 # Uncomment following to test env
-env = ThreePullerEnv()
+env = TriPullerEnv()
 env.reset()
 for _ in range(200):
     env.render()

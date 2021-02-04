@@ -63,6 +63,8 @@ class TwoCarrierEnv(gym.Env):
             self.rod_pose[0]-.5*np.cos(self.rod_pose[-1]), 
             self.rod_pose[1]-.5*np.sin(self.rod_pose[-1])
         ])
+        self.c0_traj = [self.c0_position.copy()]
+        self.c1_traj = [self.c1_position.copy()]
 
         return self.rod_pose 
         
@@ -70,7 +72,7 @@ class TwoCarrierEnv(gym.Env):
         done = False
         info = ''
         reward = 0
-        prev_rod = self.rod_pose.copy()
+        # prev_rod = self.rod_pose.copy()
         prev_c0 = self.c0_position.copy()
         prev_c1 = self.c1_position.copy()
         # compute rod's displacement and rotation
@@ -90,24 +92,28 @@ class TwoCarrierEnv(gym.Env):
             self.rod_pose[0]-.5*np.cos(self.rod_pose[-1]), 
             self.rod_pose[1]-.5*np.sin(self.rod_pose[-1])
         ])
+        self.c0_traj.append(self.c0_position.copy())
+        self.c1_traj.append(self.c1_position.copy())
         # restrict angle in (-pi,pi)
         if np.pi<self.rod_pose[-1]<=2*np.pi:
             self.rod_pose[-1] -= 2*np.pi 
         elif -np.pi>self.rod_pose[-1]>=-2*np.pi:
             self.rod_pose[-1] += 2*np.pi
         # compute reward
-        uvec_vert = np.array([0., 1.]) # unit vertical vector
-        uvec_prod = (prev_c0-prev_c1)/np.linalg.norm(prev_c0-prev_c1) # unit vector of previous rod
-        uvec_rod = (self.c0_position-self.c1_position)/np.linalg.norm(self.c0_position-self.c1_position) # unit vector of current rod
-        prev_vertang = np.arccos(np.dot(uvec_vert, uvec_prod)) # angle between previous rod and vertical vector
-        if prev_vertang>np.pi/2:
-            prev_vertang = np.pi-prev_vertang # restrict angle to (0, pi/2)
-        vertang = np.arccos(np.dot(uvec_vert, uvec_rod)) # angle between current rod and vertical vector
-        if vertang>np.pi/2:
-            vertang = np.pi-vertang
-        reward = 100*(np.abs(prev_rod[0])-np.abs(self.rod_pose[0])) + \
-            100*(self.rod_pose[1]-prev_rod[1]) + \
-            100*(prev_vertang-vertang) 
+        # uvec_vert = np.array([0., 1.]) # unit vertical vector
+        # uvec_prod = (prev_c0-prev_c1)/np.linalg.norm(prev_c0-prev_c1) # unit vector of previous rod
+        # uvec_rod = (self.c0_position-self.c1_position)/np.linalg.norm(self.c0_position-self.c1_position) # unit vector of current rod
+        # prev_vertang = np.arccos(np.dot(uvec_vert, uvec_prod)) # angle between previous rod and vertical vector
+        # if prev_vertang>np.pi/2:
+        #     prev_vertang = np.pi-prev_vertang # restrict angle to (0, pi/2)
+        # vertang = np.arccos(np.dot(uvec_vert, uvec_rod)) # angle between current rod and vertical vector
+        # if vertang>np.pi/2:
+        #     vertang = np.pi-vertang
+        # reward = 100*(np.abs(prev_rod[0])-np.abs(self.rod_pose[0])) + \
+        #     100*(self.rod_pose[1]-prev_rod[1]) + \
+        #     100*(prev_vertang-vertang) 
+        reward = 100*(np.abs(prev_c0[0])-np.abs(self.c0_position[0]) + np.abs(prev_c1[0])-np.abs(self.c1_position[0])) + \
+            100*(self.c0_position[1]-prev_c0[1] + self.c1_position[1]-prev_c1[1])
         
         # check crash
         rod_points = np.linspace(self.c0_position, self.c1_position, 50)
@@ -153,6 +159,10 @@ class TwoCarrierEnv(gym.Env):
             color='darkorange'
         )
         # plot trajectory
+        traj_c0 = np.array(self.c0_traj)
+        traj_c1 = np.array(self.c1_traj)
+        self.ax.plot(traj_c0[:,0], traj_c0[:,1], linestyle=':', linewidth=0.5, color='black')
+        self.ax.plot(traj_c1[:,0], traj_c1[:,1], linestyle=':', linewidth=0.5, color='black')
         # Set ax
         self.ax.axis(np.array([-5.6, 5.6, -.6, 6.6]))
         plt.pause(0.02)
@@ -164,7 +174,8 @@ env = TwoCarrierEnv()
 env.reset()
 for _ in range(1000):
     env.render()
-    o,r,d,i = env.step(np.random.randint(0,4,(2)))
+    # o,r,d,i = env.step(np.random.randint(0,4,(2)))
+    o,r,d,i = env.step([0,1])
     print(o, r, d, i)
     if d:
         break
