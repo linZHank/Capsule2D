@@ -87,7 +87,7 @@ class TriPullerEnv(gym.Env):
         self.step_counter += 1
         if self.step_counter >= self.max_episode_steps:
             done = True
-        if dist<=0.01:
+        if dist<=0.02:
             reward = 100
             done = True
             info = '\n!!!!\nTarget Caught\n!!!!\n'
