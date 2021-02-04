@@ -33,7 +33,7 @@ class TwoCarrierEnv(gym.Env):
             self.rod_pose[0]-.5*np.cos(self.rod_pose[-1]), 
             self.rod_pose[1]-.5*np.sin(self.rod_pose[-1])
         ])
-        self.max_episode_steps = 200
+        self.max_episode_steps = 1000
         # prepare render
         self.fig = plt.figure(figsize=(10,10))
         self.ax = self.fig.add_subplot(111)
@@ -138,14 +138,14 @@ class TwoCarrierEnv(gym.Env):
         # add wall patches
         c0pat = Circle(
             xy=(self.c0_position[0], self.c0_position[-1]), 
-            radius=.1, 
+            radius=.05, 
             ec='black',
             fc='white'
         )
         patch_list.append(c0pat)
         c1pat = Circle(
             xy=(self.c1_position[0], self.c1_position[-1]), 
-            radius=.1, 
+            radius=.05, 
             fc='black'
         )
         patch_list.append(c1pat)
@@ -161,8 +161,8 @@ class TwoCarrierEnv(gym.Env):
         # plot trajectory
         traj_c0 = np.array(self.c0_traj)
         traj_c1 = np.array(self.c1_traj)
-        self.ax.plot(traj_c0[:,0], traj_c0[:,1], linestyle=':', linewidth=0.5, color='black')
-        self.ax.plot(traj_c1[:,0], traj_c1[:,1], linestyle=':', linewidth=0.5, color='black')
+        self.ax.plot(traj_c0[-100:,0], traj_c0[-100:,1], linestyle=':', linewidth=0.5, color='black')
+        self.ax.plot(traj_c1[-100:,0], traj_c1[-100:,1], linestyle=':', linewidth=0.5, color='black')
         # Set ax
         self.ax.axis(np.array([-5.6, 5.6, -.6, 6.6]))
         plt.pause(0.02)
@@ -174,8 +174,8 @@ env = TwoCarrierEnv()
 env.reset()
 for _ in range(1000):
     env.render()
-    # o,r,d,i = env.step(np.random.randint(0,4,(2)))
-    o,r,d,i = env.step([0,1])
+    o,r,d,i = env.step(np.random.randint(0,4,(2)))
+    # o,r,d,i = env.step([0,1])
     print(o, r, d, i)
     if d:
         break

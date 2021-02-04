@@ -26,7 +26,7 @@ class TriPullerEnv(gym.Env):
         self.fig = plt.figure(figsize=(10,10))
         self.ax = self.fig.add_subplot(111)
         # parameters
-        self.max_episode_steps = 100
+        self.max_episode_steps = 200
             
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -130,7 +130,7 @@ class TriPullerEnv(gym.Env):
         )
         # plot catcher's trajectory
         traj_c = np.array(self.traj_catcher)
-        self.ax.plot(traj_c[:,0], traj_c[:,1], linestyle=':', linewidth=0.5, color='black')
+        self.ax.plot(traj_c[-100:,0], traj_c[-100:,1], linestyle=':', linewidth=0.5, color='black')
         # Set ax
         self.ax.axis(np.array([-1.2, 1.2, -1., 1.4]))
         plt.pause(0.02)
@@ -140,8 +140,8 @@ class TriPullerEnv(gym.Env):
 # Uncomment following to test env
 env = TriPullerEnv()
 env.reset()
-for _ in range(200):
+for _ in range(env.max_episode_steps):
     env.render()
-    o,r,d,i = env.step([1,0,0])
-    # o,r,d,i = env.step(np.random.randint(0,2,(3)))
+    # o,r,d,i = env.step([1,0,0])
+    o,r,d,i = env.step(np.random.randint(0,2,(3)))
     print(o)
