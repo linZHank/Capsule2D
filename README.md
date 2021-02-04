@@ -4,11 +4,14 @@ This repo provides two training environment for **AE5117: Intelligent Robotics**
 - TwoCarrier-v0
 # Installation
 ## Pre-requisites
-- [**Python3**](https://www.python.org/)
+- [Python3](https://www.python.org/)
 > The environments were tested under Python 3.6.9, but Python 2 should be OK.
 - [pip](https://pypi.org/project/pip/)
-> In case not coming with Python, refer to the [installation guide](https://pip.pypa.io/en/stable/installing/).
-
+- [Git](https://git-scm.com/)
+- For **Ubuntu** or **RaspberryPi** users, bring up a terminal and run
+```console
+sudo apt install python3-dev python3-pip git
+```
 ## Installation
 1. Bring up a terminal console  
 2. `cd desired_directory`
