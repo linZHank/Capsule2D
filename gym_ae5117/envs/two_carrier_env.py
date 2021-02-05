@@ -36,7 +36,7 @@ class TwoCarrierEnv(gym.Env):
         self.c0_traj = []
         self.c1_traj = []
         # prepare renderer
-        self.fig = plt.figure(figsize=(10,10))
+        self.fig = plt.figure(figsize=(12,8))
         self.ax = self.fig.add_subplot(111)
         nwwpat = Rectangle(xy=(-5.5,5), width=5.1, height=.5, fc='gray')
         newpat = Rectangle(xy=(.4,5), width=5.1, height=.5, fc='gray')
@@ -108,9 +108,9 @@ class TwoCarrierEnv(gym.Env):
         # vertang = np.arccos(np.dot(uvec_vert, uvec_rod)) # angle between current rod and vertical vector
         # if vertang>np.pi/2:
         #     vertang = np.pi-vertang
-        # reward = (np.abs(prev_rod[0])-np.abs(self.rod_pose[0])) + \
-        #     10*(self.rod_pose[1]-prev_rod[1]) + \
-        #     10*(prev_vertang-vertang) 
+        # reward = np.abs(prev_rod[0])-np.abs(self.rod_pose[0]) + \
+        #     self.rod_pose[1]-prev_rod[1] + \
+        #     prev_vertang-vertang 
         reward = np.abs(prev_c0[0])-np.abs(self.c0_position[0]) + np.abs(prev_c1[0])-np.abs(self.c1_position[0]) + \
             (self.c0_position[1]-prev_c0[1] + self.c1_position[1]-prev_c1[1])
         
@@ -164,7 +164,10 @@ class TwoCarrierEnv(gym.Env):
             self.ax.plot(traj_c0[-100:,0], traj_c0[-100:,1], linestyle=':', linewidth=0.5, color='black')
             self.ax.plot(traj_c1[-100:,0], traj_c1[-100:,1], linestyle=':', linewidth=0.5, color='black')
         # Set ax
-        self.ax.axis(np.array([-5.6, 5.6, -.6, 10.6]))
+        self.ax.axis(np.array([-6, 6, -1, 7]))
+        self.ax.set_xticks(np.arange(-6, 7))
+        self.ax.set_yticks(np.arange(-1, 8))
+        self.ax.grid(color='grey', linestyle=':', linewidth=0.5)
         plt.pause(0.02)
         self.fig.show()
 

@@ -140,6 +140,7 @@ class TriPullerEnv(gym.Env):
             self.ax.plot(traj_c[-100:,0], traj_c[-100:,1], linestyle=':', linewidth=0.5, color='black')
         # Set ax
         self.ax.axis(np.array([-1.2, 1.2, -1., 1.4]))
+        self.ax.grid(color='grey', linestyle=':', linewidth=0.5)
         plt.pause(0.02)
         self.fig.show()
 
