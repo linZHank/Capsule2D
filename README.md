@@ -2,7 +2,6 @@
 This repo provides two training environment for **AE5117: Intelligent Robotics**'s course project. 
 - TriPuller-v0
 - TwoCarrier-v0
-The environments are built under the [OpenAI Gym](https://github.com/openai/gym)'s framework. Both consider kinematics only. Current environments were tested under **Ubuntu 18.04** and **macOS Mojave**.
 
 # Installation
 ## Pre-requisites
