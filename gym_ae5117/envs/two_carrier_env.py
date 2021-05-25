@@ -80,7 +80,9 @@ class TwoCarrierEnv(gym.Env):
         disp = self.action_codebook[action[0]] + self.action_codebook[action[1]]
         rot = 0.
         rot += -np.arctan2(self.action_codebook[action[0]][0]*np.sin(self.rod_pose[-1]), .5) + \
-            np.arctan2(self.action_codebook[action[0]][1]*np.cos(self.rod_pose[-1]), .5)
+            np.arctan2(self.action_codebook[action[0]][1]*np.cos(self.rod_pose[-1]), .5) + \
+            np.arctan2(self.action_codebook[action[1]][0]*np.sin(self.rod_pose[-1]), .5) - \
+            np.arctan2(self.action_codebook[action[1]][1]*np.cos(self.rod_pose[-1]), .5)
         deltas = np.append(disp, rot)
         self.rod_pose += deltas
         self.c0_position = np.array([
