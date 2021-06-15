@@ -101,18 +101,6 @@ class TwoCarrierEnv(gym.Env):
         elif -np.pi>self.rod_pose[-1]>=-2*np.pi:
             self.rod_pose[-1] += 2*np.pi
         # compute reward
-        # uvec_vert = np.array([0., 1.]) # unit vertical vector
-        # uvec_prod = (prev_c0-prev_c1)/np.linalg.norm(prev_c0-prev_c1) # unit vector of previous rod
-        # uvec_rod = (self.c0_position-self.c1_position)/np.linalg.norm(self.c0_position-self.c1_position) # unit vector of current rod
-        # prev_vertang = np.arccos(np.dot(uvec_vert, uvec_prod)) # angle between previous rod and vertical vector
-        # if prev_vertang>np.pi/2:
-        #     prev_vertang = np.pi-prev_vertang # restrict angle to (0, pi/2)
-        # vertang = np.arccos(np.dot(uvec_vert, uvec_rod)) # angle between current rod and vertical vector
-        # if vertang>np.pi/2:
-        #     vertang = np.pi-vertang
-        # reward = np.abs(prev_rod[0])-np.abs(self.rod_pose[0]) + \
-        #     self.rod_pose[1]-prev_rod[1] + \
-        #     prev_vertang-vertang 
         reward = np.abs(prev_c0[0])-np.abs(self.c0_position[0]) + np.abs(prev_c1[0])-np.abs(self.c1_position[0]) + \
             (self.c0_position[1]-prev_c0[1] + self.c1_position[1]-prev_c1[1])
         

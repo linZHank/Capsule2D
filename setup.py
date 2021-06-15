@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='gym_ae5117',
+setup(name='gym_coop',
       version='0.0.1',
       install_requires=['gym',
                         'numpy',
