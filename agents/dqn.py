@@ -28,13 +28,12 @@ class Critic(tf.keras.Model):
         # return tf.squeeze(qval, axis=-1)
 
 class DQNAgent(tf.keras.Model):
-    def __init__(self, dim_obs, num_act, hidden_sizes=(256,256), activation='relu', gamma = 0.99, alpha=0.,
-                 lr=3e-4, polyak=0.995, **kwargs):
+    def __init__(self, dim_obs, num_act, hidden_sizes=(256,256), activation='relu', gamma = 0.99,
+                 lr=2e-4, polyak=0.995, **kwargs):
         super(DQNAgent, self).__init__(name='dqn', **kwargs)
         # params
         self.dim_obs = dim_obs
         self.num_act = num_act
-        self.alpha = alpha # entropy temperature
         self.gamma = gamma # discount rate
         self.polyak = polyak
         self.init_eps = 1.

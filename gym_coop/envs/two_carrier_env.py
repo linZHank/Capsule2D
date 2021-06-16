@@ -14,7 +14,7 @@ class TwoCarrierEnv(gym.Env):
         self.seed()
         self.viewer = None
         self.prev_reward = None
-        self.max_episode_steps = 500
+        self.max_episode_steps = 1000
         self.observation_space = spaces.Box(low=-10., high=10., shape=(3,), dtype=np.float32)
         self.action_space = spaces.Tuple((spaces.Discrete(4), spaces.Discrete(4))) # ^v<>
         self.action_codebook = np.array([
@@ -53,8 +53,8 @@ class TwoCarrierEnv(gym.Env):
         self.step_counter = 0
         # init rod coordinations
         x = np.random.uniform(-3.9, 3.9)
-        y = .2
-        theta = 0.
+        y = np.random.uniform(1., 4.)
+        theta = np.random.uniform(-np.pi, np.pi)
         self.rod_pose = np.array([x, y, theta])
         self.c0_position = np.array([
             self.rod_pose[0]+.5*np.cos(self.rod_pose[-1]), 
@@ -164,13 +164,12 @@ class TwoCarrierEnv(gym.Env):
 
 # Uncomment following to test env
 # env = TwoCarrierEnv()
-# env.reset()
 # for _ in range(20):
-#     o,r,d,i = env.step([0,0])
-# for _ in range(env.max_episode_steps):
-#     env.render()
-#     # o,r,d,i = env.step(np.random.randint(0,4,(2)))
-#     o,r,d,i = env.step([1,2])
-#     print(o, r, d, i)
-#     if d:
-#         break
+#     env.reset()
+#     for _ in range(100):
+#         env.render()
+#         o,r,d,i = env.step(np.random.randint(0,4,(2)))
+#         # o,r,d,i = env.step([1,2])
+#         print(o, r, d, i)
+#         if d:
+#             break

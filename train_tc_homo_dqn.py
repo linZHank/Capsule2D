@@ -16,12 +16,12 @@ rb0 = DQNBuffer(dim_obs=3, size=int(2e5)) # max_size is the upper-bound
 rb1 = DQNBuffer(dim_obs=3, size=int(2e5)) # max_size is the upper-bound
 
 # paramas
-batch_size = 1000
-update_freq = 50
+batch_size = 500
+update_freq = 100
 update_after = 1000
-decay_period = 1000
+decay_period = 1500
 warmup = 50
-total_steps = int(3e5)
+total_steps = int(1e6)
 episodic_returns = []
 sedimentary_returns = []
 episodic_steps = []
