@@ -5,23 +5,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import logging
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 from agents.dqn import DQNAgent, DQNBuffer
 
 env = gym.make('gym_coop:TwoCarrier-v0')
 agent0 = DQNAgent(dim_obs=3, num_act=4)
 agent1 = DQNAgent(dim_obs=3, num_act=4)
-rb0 = DQNBuffer(dim_obs=3, size=int(1e6)) # max_size is the upper-bound
-rb1 = DQNBuffer(dim_obs=3, size=int(1e6)) # max_size is the upper-bound
+rb0 = DQNBuffer(dim_obs=3, size=int(2e5)) # max_size is the upper-bound
+rb1 = DQNBuffer(dim_obs=3, size=int(2e5)) # max_size is the upper-bound
 
 # paramas
-batch_size = 200
+batch_size = 1000
 update_freq = 50
 update_after = 1000
-decay_period = 800
+decay_period = 1000
 warmup = 50
-total_steps = int(1e6)
+total_steps = int(3e5)
 episodic_returns = []
 sedimentary_returns = []
 episodic_steps = []
@@ -75,10 +75,10 @@ for t in range(total_steps):
 # model_path = os.path.join(model_dir, str(episode_counter))
 # dqn.q.q_net.save(model_path)
 # plot returns
-fig, ax = plt.subplots(figsize=(8, 6))
-fig.suptitle('Averaged Returns')
-ax.plot(sedimentary_returns)
-plt.show()
+# fig, ax = plt.subplots(figsize=(8, 6))
+# fig.suptitle('Averaged Returns')
+# ax.plot(sedimentary_returns)
+# plt.show()
 
 # Test
 input("Press ENTER to test lander...")

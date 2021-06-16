@@ -10,15 +10,15 @@ logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 from agents.ppo import PPOAgent, PPOBuffer
 
 env = gym.make('gym_coop:TwoCarrier-v0')
-agent0 = PPOAgent(dim_obs=3, num_act=4, target_kld=0.2)
-agent1 = PPOAgent(dim_obs=3, num_act=4, target_kld=0.2)
+agent0 = PPOAgent(dim_obs=3, num_act=4, target_kld=0.02)
+agent1 = PPOAgent(dim_obs=3, num_act=4, target_kld=0.02)
 rb0 = PPOBuffer(dim_obs=3, max_size=6000) # max_size is the upper-bound
 rb1 = PPOBuffer(dim_obs=3, max_size=6000) # max_size is the upper-bound
 
 # paramas
 min_steps_per_train = rb0.max_size - env.max_episode_steps
 assert min_steps_per_train>0
-num_trains = 200
+num_trains = 100
 train_epochs = 80
 save_freq = 20
 # variables
