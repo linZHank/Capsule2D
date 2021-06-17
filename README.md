@@ -19,7 +19,7 @@ This repo provides two training environment:
 
 ## Quick Start
 ### TriPuller-v0
-![TriPuller](https://github.com/IRASatUC/gym-coop/blob/main/images/TriPuller.png)
+![TriPuller](https://github.com/linZHank/gym-coop/blob/main/images/TriPuller.png)
 ```python
 import gym
 env = gym.make('gym_coop:TriPuller-v0')
@@ -30,7 +30,7 @@ for _ in range(100):
 ```
 
 ### TwoCarrier-v0
-![TwoCarrier](https://github.com/IRASatUC/gym-coop/blob/main/images/TwoCarrier.png)
+![TwoCarrier](https://github.com/linZHank/gym-coop/blob/main/images/TwoCarrier.png)
 ```python
 import gym
 env = gym.make('gym_coop:TwoCarrier-v0')
