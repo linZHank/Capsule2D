@@ -45,7 +45,7 @@ class SoloEscapeEnv(gym.Env):
         self.step_counter = 0
         # init rod coordinations
         x = np.random.uniform(-4.5, 4.5)
-        y = np.random.uniform(.5, 1.)
+        y = np.random.uniform(.5, 4.5)
         self.position = np.array([x, y])
         self.trajectory = [self.position.copy()]
 
@@ -118,13 +118,13 @@ class SoloEscapeEnv(gym.Env):
 
 
 # Uncomment following to test env
-env = SoloEscapeEnv()
-for _ in range(20):
-   env.reset()
-   for _ in range(100):
-       env.render()
-       o,r,d,i = env.step(env.action_space.sample())
-       # o,r,d,i = env.step([1,2])
-       print(o, r, d, i)
-       if d:
-           break
+#  env = SoloEscapeEnv()
+#  for _ in range(20):
+   #  env.reset()
+   #  for _ in range(100):
+       #  env.render()
+       #  o,r,d,i = env.step(env.action_space.sample())
+       #  # o,r,d,i = env.step([1,2])
+       #  print(o, r, d, i)
+       #  if d:
+           #  break
