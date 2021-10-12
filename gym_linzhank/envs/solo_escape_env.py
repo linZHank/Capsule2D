@@ -18,7 +18,7 @@ class SoloEscapeEnv(gym.Env):
         self.prev_reward = None
         self.max_episode_steps = 1000
         self.observation_space = spaces.Box(
-            low=-10.0, high=10.0, shape=(3,), dtype=np.float32
+            low=-10.0, high=10.0, shape=(2,), dtype=np.float32
         )
         self.action_space = spaces.Discrete(4)
         self.action_codebook = np.array(
@@ -53,7 +53,7 @@ class SoloEscapeEnv(gym.Env):
 
     def step(self, action):
         done = False
-        info = ""
+        info = {}
         reward = 0
         # compute displacement
         prev_pos = self.position.copy()
@@ -70,13 +70,13 @@ class SoloEscapeEnv(gym.Env):
         for pat in self.fixed_patches:
             if np.sum(pat.contains_point(self.position, radius=0.001)):
                 done = True
-                info = "crash wall"
+                #  info = "crash wall"
                 break
         # check escape
         if self.position[1] > 5.5:
             reward = 100.0
             done = True
-            info = "escaped"
+            #  info = "escaped"
 
         return self.position, reward, done, info
 
