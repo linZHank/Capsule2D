@@ -7,7 +7,7 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 
-class TwoCarrierEnv(gym.Env):
+class DuoCarrierEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
@@ -163,7 +163,7 @@ class TwoCarrierEnv(gym.Env):
 
 
 # Uncomment following to test env
-# env = TwoCarrierEnv()
+# env = DuoCarrierEnv()
 # for _ in range(20):
 #     env.reset()
 #     for _ in range(100):

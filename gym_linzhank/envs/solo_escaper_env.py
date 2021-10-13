@@ -9,7 +9,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 
 
-class SoloEscapeEnv(gym.Env):
+class SoloEscaperEnv(gym.Env):
     metadata = {"render.modes": ["human"]}
 
     def __init__(self):
@@ -70,13 +70,13 @@ class SoloEscapeEnv(gym.Env):
         for pat in self.fixed_patches:
             if np.sum(pat.contains_point(self.position, radius=0.001)):
                 done = True
-                #  info = "crash wall"
+                info = {"status": "crash wall"}
                 break
         # check escape
         if self.position[1] > 5.5:
             reward = 100.0
             done = True
-            #  info = "escaped"
+            info = {"status": "escaped"}
 
         return self.position, reward, done, info
 

@@ -1,8 +1,8 @@
 from gym.envs.registration import register
 
 register(
-    id='SoloEscape-v0',
-    entry_point='gym_linzhank.envs:SoloEscapeEnv',
+    id='SoloEscaper-v0',
+    entry_point='gym_linzhank.envs:SoloEscaperEnv',
     nondeterministic=True
 )
 
@@ -13,8 +13,8 @@ register(
 )
 
 register(
-    id='TwoCarrier-v0',
-    entry_point='gym_linzhank.envs:TwoCarrierEnv',
+    id='DuoCarrier-v0',
+    entry_point='gym_linzhank.envs:DuoCarrierEnv',
     nondeterministic=True
 )
 

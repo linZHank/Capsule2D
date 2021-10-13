@@ -11,9 +11,9 @@ Only relying on kinematics to move and [Matplotlib](https://matplotlib.org/)
 to visualized. 
 
 
-- SoloEscape-v0
+- SoloEscaper-v0
 - TriPuller-v0
-- TwoCarrier-v0
+- DuoCarrier-v0
 
 # Installation
 ## Pre-requisites
@@ -42,10 +42,10 @@ for _ in range(100):
 ```
 
 ### TwoCarrier-v0
-![TwoCarrier](https://github.com/linZHank/gym-linzhank/blob/main/images/TwoCarrier.png)
+![DuoCarrier](https://github.com/linZHank/gym-linzhank/blob/main/images/DuoCarrier.png)
 ```python
 import gym
-env = gym.make('gym_linzhank:TwoCarrier-v0')
+env = gym.make('gym_linzhank:DuoCarrier-v0')
 env.reset()
 for _ in range(100):
     env.render()
