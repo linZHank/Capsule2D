@@ -1,53 +1,26 @@
-# gym-linzhank
+# gym-explore
 This project is originated from a course project which was introduced in 
 University of Cincinnati's 
 [AEEM6117](https://www.coursicle.com/uc/courses/AEEM/6117/) in 2021 Spring.
 
-This repo contains a personal collection of simple simulated environments for 
-the study of reinforcement learning.
-As opposed to those large-scale environments depending on a complicated 
-multibody dynamics simulation engine, the ones in this repo are simple. 
-Only relying on kinematics to move and [Matplotlib](https://matplotlib.org/) 
-to visualized. 
+Objective of this project is to explore auto exploration strategies for RL agent. 
+This repo contains a personal collection of [OpenAI Gym](https://github.com/openai/gym) like environemnt rendered with [Matplotlib](https://matplotlib.org/) 
+only. 
 
 
-- SoloEscaper-v0
-- TriPuller-v0
-- DuoCarrier-v0
+- Escaper-v0
 
 # Installation
 ## Pre-requisites
 - [Python3](https://www.python.org/)
-> The environments were tested under Python 3.8.10, but Python 2 should be OK.
+> The environments were tested in Python 3.8.10. Other versions of Python may work as well.
 - [pip](https://pypi.org/project/pip/)
 - [Git](https://git-scm.com/)
 
-## Installation (Ubuntu)
-1. Bring up a terminal console  
-2. `cd` *`desired_directory/`* 
-3. `git clone https://github.com/IRASatUC/gym-linzhank.git`
-4. `cd gym-linzhank`
-5. `pip install -e .`
-
-## Quick Start
-### TriPuller-v0
-![TriPuller](https://github.com/linZHank/gym-linzhank/blob/main/images/TriPuller.png)
-```python
-import gym
-env = gym.make('gym_linzhank:TriPuller-v0')
-env.reset()
-for _ in range(100):
-    env.render()
-    env.step(env.action_space.sample())
+## Installation (Linux & MacOS)
+```shell
+git clone https://github.com/linzhank/gym-explore.git
+cd gym-explore`
+pip install -e gym-explore
 ```
 
-### TwoCarrier-v0
-![DuoCarrier](https://github.com/linZHank/gym-linzhank/blob/main/images/DuoCarrier.png)
-```python
-import gym
-env = gym.make('gym_linzhank:DuoCarrier-v0')
-env.reset()
-for _ in range(100):
-    env.render()
-    env.step(env.action_space.sample())
-```
