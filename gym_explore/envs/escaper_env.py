@@ -9,7 +9,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 
 
-class SoloEscaperEnv(gym.Env):
+class EscaperEnv(gym.Env):
     metadata = {"render.modes": ["human"]}
 
     def __init__(self):

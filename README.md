@@ -20,7 +20,27 @@ only.
 ## Installation (Linux & MacOS)
 ```shell
 git clone https://github.com/linzhank/gym-explore.git
-cd gym-explore`
 pip install -e gym-explore
+```
+
+# Usage
+```python
+import gym
+from gym.envs.registration import register
+register(
+    id='escaper-v0',
+    entry_point='gym_explore.envs:EscaperEnv',
+)
+
+env = gym.make('escaper-v0')
+observation, info = env.reset(return_info=True)
+for _ in range(100):
+    env.render()
+    action = env.action_space.sample()
+    observation, reward, done, info = env.step(action)
+    if done:
+        observation, info = env.reset(return_info=True)
+
+env.close()
 ```
 
