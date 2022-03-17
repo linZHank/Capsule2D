@@ -9,6 +9,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 
 
+# TODO: upgrade room to round
 class EscaperEnv(gym.Env):
     metadata = {"render.modes": ["human"]}
 
@@ -20,10 +21,7 @@ class EscaperEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=-10.0, high=10.0, shape=(2,), dtype=np.float32
         )
-        self.action_space = spaces.Discrete(4)
-        self.action_codebook = np.array(
-            [[0.0, 0.05], [0.0, -0.05], [-0.05, 0.0], [0.05, 0.0]]
-        )
+        self.action_space = spaces.Box(low=-0.1 , high=0.1 , shape=(2,) , dtype=np.np.float32)
         # vars
         self.position = np.zeros(2)
         self.trajectory = []
@@ -51,6 +49,7 @@ class EscaperEnv(gym.Env):
 
         return self.position
 
+    # TODO: upgrade to continuous action
     def step(self, action):
         done = False
         info = {}
