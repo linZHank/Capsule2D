@@ -37,7 +37,7 @@ class EscaperEnv(gym.Env):
         self.position = np.zeros(2)
         self.trajectory = []
         # prepare renderer
-        self.fig = plt.figure(figsize=(8, 8))
+        self.fig = plt.figure(figsize=(7, 7))
         self.ax = self.fig.add_subplot(111)
         outer_wall = Circle(xy=(0, 0), radius=8.0, fc="grey", ec=None)
         inner_wall = Circle(xy=(0, 0), radius=7.0, fc="white", ec=None)
