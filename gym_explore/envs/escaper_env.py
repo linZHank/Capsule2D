@@ -1,63 +1,92 @@
-import os
-import time
+from typing import Optional
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Ellipse, RegularPolygon, Circle
+from matplotlib.patches import Wedge, Circle
 from matplotlib.collections import PatchCollection
 import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
+from gym import spaces
 
 
+# TODO:
 class EscaperEnv(gym.Env):
     metadata = {"render.modes": ["human"]}
 
-    def __init__(self):
-        self.seed()
-        self.viewer = None
+    def __init__(self, continuous: bool = False):
         self.prev_reward = None
         self.max_episode_steps = 1000
+        self.continuous = continuous
         self.observation_space = spaces.Box(
             low=-10.0, high=10.0, shape=(2,), dtype=np.float32
         )
-        self.action_space = spaces.Discrete(4)
-        self.action_codebook = np.array(
-            [[0.0, 0.05], [0.0, -0.05], [-0.05, 0.0], [0.05, 0.0]]
-        )
+        if self.continuous:
+            self.action_space = spaces.Box(
+                low=-0.4, high=0.4, shape=(2,), dtype=np.float32
+            )
+        else:
+            self.action_codebook = np.array(
+                [
+                    [0.0, 0.0],  # stop
+                    [0.0, 0.2],  # up
+                    [0.0, -0.2],  # down
+                    [-0.2, 0.0],  # left
+                    [0.2, 0.0],  # right
+                ]
+            )
+            self.action_space = spaces.Discrete(5)
         # vars
         self.position = np.zeros(2)
         self.trajectory = []
         # prepare renderer
-        self.fig = plt.figure(figsize=(12, 8))
+        self.fig = plt.figure(figsize=(8, 8))
         self.ax = self.fig.add_subplot(111)
-        nwwpat = Rectangle(xy=(-5.5, 5), width=5.2, height=0.5, fc="gray")
-        newpat = Rectangle(xy=(0.3, 5), width=5.2, height=0.5, fc="gray")
-        wwpat = Rectangle(xy=(-5.5, -0.5), width=0.5, height=6, fc="gray")
-        ewpat = Rectangle(xy=(5, -0.5), width=0.5, height=6, fc="gray")
-        swpat = Rectangle(xy=(-5.5, -0.5), width=11, height=0.5, fc="gray")
-        self.fixed_patches = [nwwpat, newpat, wwpat, ewpat, swpat]
+        outer_wall = Circle(xy=(0, 0), radius=8.0, fc="grey", ec=None)
+        inner_wall = Circle(xy=(0, 0), radius=7.0, fc="white", ec=None)
+        doorway = Wedge(
+            center=(0, 0), r=8.0, theta1=85.0, theta2=95, fc="white", ec=None
+        )
+        self.fixed_patches = [outer_wall, inner_wall, doorway]
 
-    def seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
-
-    def reset(self):
+    # def seed(self, seed=None):
+    #     self.np_random, seed = seeding.np_random(seed)
+    #     return [seed]
+    #
+    def reset(
+        self,
+        *,
+        seed: Optional[int] = None,
+        return_info: bool = False,
+    ):
+        super().reset(seed=seed)
         self.step_counter = 0
-        # init rod coordinations
-        x = np.random.uniform(-4.5, 4.5)
-        y = np.random.uniform(.5, 4.5)
-        self.position = np.array([x, y])
+        r = np.random.uniform(low=-6.5, high=6.5)
+        th = np.random.uniform(low=-np.pi, high=np.pi)
+        x = r * np.cos(th)
+        y = r * np.sin(th)
+        self.position = np.array([x, y])  # escaper init position
         self.trajectory = [self.position.copy()]
 
-        return self.position
+        if not return_info:
+            return self.position
+        else:
+            return self.position, {}
 
+    # TODO: upgrade to continuous action
     def step(self, action):
+        if self.continuous:
+            action = np.clip(action, -0.4, 0.4).astype(np.float32)
+        else:
+            assert self.action_space.contains(
+                action
+            ), f"{action!r} ({type(action)}) invalid "
         done = False
-        info = {}
+        info = {"status": "trapped"}
         reward = 0
         # compute displacement
         prev_pos = self.position.copy()
-        self.position += self.action_codebook[action]
+        if self.continuous:
+            self.position += action
+        else:
+            self.position += self.action_codebook[action]
         # compute reward
         reward = (
             np.abs(prev_pos[0])
@@ -67,16 +96,25 @@ class EscaperEnv(gym.Env):
         )
         self.trajectory.append(self.position.copy())
         # check crash
-        for pat in self.fixed_patches:
-            if np.sum(pat.contains_point(self.position, radius=0.001)):
-                done = True
-                info = {"status": "crash wall"}
-                break
-        # check escape
-        if self.position[1] > 5.5:
+        if self.fixed_patches[0].contains_point(self.position, radius=0.1):
+            if not self.fixed_patches[1].contains_point(self.position, radius=0.1):
+                if not self.fixed_patches[2].contains_point(self.position, radius=0.1):
+                    done = True
+                    info = {"status": "crash wall"}
+        else:
             reward = 100.0
             done = True
             info = {"status": "escaped"}
+        # for pat in self.fixed_patches:
+        #     if np.sum(pat.contains_point(self.position, radius=0.001)):
+        #         done = True
+        #         info = {"status": "crash wall"}
+        #         break
+        # check escape
+        # if self.position[1] > 5.5:
+        #     reward = 100.0
+        #     done = True
+        #     info = {"status": "escaped"}
 
         return self.position, reward, done, info
 
@@ -88,8 +126,8 @@ class EscaperEnv(gym.Env):
         # add wall patches
         escaper_pat = Circle(
             xy=(self.position[0], self.position[-1]),
-            radius=0.1,
-            ec="black",
+            radius=0.2,
+            ec="blueviolet",
             fc="white",
         )
         patch_list.append(escaper_pat)
@@ -106,25 +144,24 @@ class EscaperEnv(gym.Env):
                 traj_arr[-100:, 1],
                 linestyle=":",
                 linewidth=0.5,
-                color="black",
+                color="blueviolet",
             )
         # Set ax
-        self.ax.axis(np.array([-6, 6, -1, 7]))
-        self.ax.set_xticks(np.arange(-6, 7))
-        self.ax.set_yticks(np.arange(-1, 8))
+        self.ax.axis(np.array([-10, 10, -10, 10]))
+        self.ax.set_xticks(np.arange(-10, 10))
+        self.ax.set_yticks(np.arange(-10, 10))
         self.ax.grid(color="grey", linestyle=":", linewidth=0.5)
         plt.pause(0.02)
         self.fig.show()
 
 
 # Uncomment following to test env
-#  env = SoloEscapeEnv()
-#  for _ in range(20):
-   #  env.reset()
-   #  for _ in range(100):
-       #  env.render()
-       #  o,r,d,i = env.step(env.action_space.sample())
-       #  # o,r,d,i = env.step([1,2])
-       #  print(o, r, d, i)
-       #  if d:
-           #  break
+# env = EscaperEnv(continuous=False)
+# env.reset()
+# for _ in range(1000):
+#     env.render()
+#     o, r, d, i = env.step(env.action_space.sample())
+#     # o,r,d,i = env.step([1,2])
+#     print(o, r, d, i)
+#     if d:
+#         break
