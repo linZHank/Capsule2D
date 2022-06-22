@@ -23,16 +23,21 @@ class EscaperEnv(gym.Env):
                 low=-0.4, high=0.4, shape=(2,), dtype=np.float32
             )
         else:
-            self.action_codebook = np.array(
-                [
-                    [0.0, 0.0],  # stop
-                    [0.0, 0.2],  # up
-                    [0.0, -0.2],  # down
-                    [-0.2, 0.0],  # left
-                    [0.2, 0.0],  # right
-                ]
-            )
-            self.action_space = spaces.Discrete(5)
+            self.action_space = spaces.Discrete(4)
+            self.action_codebook = {
+                0: np.array([0.0, 0.2]),  # up
+                1: np.array([0.0, -0.2]),  # down
+                2: np.array([-0.2, 0.0]),  # left
+                3: np.array([0.2, 0]),  # right
+            }
+            # self.action_codebook = np.array(
+            #     [
+            #         [0.0, 0.2],  # up
+            #         [0.0, -0.2],  # down
+            #         [-0.2, 0.0],  # left
+            #         [0.2, 0.0],  # right
+            #     ]
+            # )
         # vars
         self.position = np.zeros(2)
         self.trajectory = []
@@ -52,41 +57,42 @@ class EscaperEnv(gym.Env):
     #
     def reset(
         self,
-        *,
         seed: Optional[int] = None,
+        options: Optional[str] = None,
         return_info: bool = False,
     ):
         super().reset(seed=seed)
         self.step_counter = 0
-        r = np.random.uniform(low=-6.5, high=6.5)
-        th = np.random.uniform(low=-np.pi, high=np.pi)
+        # reset escaper to origin or randomly
+        r = 0.
+        th = 0.
+        if options == "random":
+            r = np.random.uniform(low=-6.5, high=6.5)
+            th = np.random.uniform(low=-np.pi, high=np.pi)
         x = r * np.cos(th)
         y = r * np.sin(th)
-        self.position = np.array([x, y])  # escaper init position
+        self.position = np.array([x, y], dtype=np.float32)  # escaper init position
+        print(f'obs: {self.position}')
         self.trajectory = [self.position.copy()]
+        info = {"status": "reset"}
 
-        if not return_info:
-            return self.position
-        else:
-            return self.position, {}
+        return (self.position, info) if return_info else self.position
 
-    # TODO: upgrade to continuous action
     def step(self, action):
+        # compute displacement
         if self.continuous:
-            action = np.clip(action, -0.4, 0.4).astype(np.float32)
+            ds = np.clip(action, -0.4, 0.4).astype(np.float32)
         else:
             assert self.action_space.contains(
                 action
             ), f"{action!r} ({type(action)}) invalid "
+            ds = self.action_codebook[action]
         done = False
         info = {"status": "trapped"}
         reward = 0
-        # compute displacement
+        # compute new position
         prev_pos = self.position.copy()
-        if self.continuous:
-            self.position += action
-        else:
-            self.position += self.action_codebook[action]
+        self.position += ds
         # compute reward
         reward = (
             np.abs(prev_pos[0])
@@ -100,7 +106,7 @@ class EscaperEnv(gym.Env):
             if not self.fixed_patches[1].contains_point(self.position, radius=0.1):
                 if not self.fixed_patches[2].contains_point(self.position, radius=0.1):
                     done = True
-                    info = {"status": "crash wall"}
+                    info = {"status": "crash"}
         else:
             reward = 100.0
             done = True
@@ -153,6 +159,9 @@ class EscaperEnv(gym.Env):
         self.ax.grid(color="grey", linestyle=":", linewidth=0.5)
         plt.pause(0.02)
         self.fig.show()
+
+    def close(self):
+        plt.close("all")
 
 
 # Uncomment following to test env
