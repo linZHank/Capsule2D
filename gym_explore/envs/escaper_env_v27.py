@@ -71,6 +71,7 @@ class EscaperEnv(gym.Env):
         info = self._get_info()
         # prepare renderer
         if self.render_mode == "human":
+            self.close()
             self._fig = plt.figure(figsize=(8, 8))
             self._ax = self._fig.add_subplot(111)
             # init fixed patches
@@ -192,11 +193,11 @@ class EscaperEnv(gym.Env):
 
 
 # Uncomment following to test env
-env = EscaperEnv(render_mode="human", continuous=False)
+env = EscaperEnv(render_mode="human", continuous=True)
 obs, info = env.reset()
 for _ in range(1000):
-    o, r, d, t, i = env.step(env.action_space.sample())
-    # o,r,d,i = env.step([1,2])
+    # o, r, d, t, i = env.step(env.action_space.sample())
+    o, r, d, t, i = env.step(np.array([-0.1, 0]))
     print(o, r, d, t, i)
     if d:
         env.reset()
