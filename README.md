@@ -4,9 +4,10 @@ This project is originated from a course project which was introduced in
 University of Cincinnati's
 [AEEM6117](https://www.coursicle.com/uc/courses/AEEM/6117/) in 2021 Spring.
 
-Objective of this project is to explore auto exploration strategies for RL agent.
-This repo contains a personal collection of [OpenAI Gym](https://github.com/openai/gym) like environemnt rendered with [Matplotlib](https://matplotlib.org/)
-only.
+Objective of this project is to investigate RL agents' exploration strategies.
+This repo contains a personal collection of 
+[OpenAI Gym](https://github.com/openai/gym) like environemnt rendered with 
+[Matplotlib](https://matplotlib.org/) only.
 
 - Escaper-v0
 
@@ -16,10 +17,13 @@ only.
 
 - [Python3](https://www.python.org/)
 
-> The environments were tested in Python 3.10.2 Other versions of Python may work as well.
+> The environments were tested in Python 3.10.8 Other versions of Python may work as well.
 
 - [pip](https://pypi.org/project/pip/)
 - [Git](https://git-scm.com/)
+- [Gymnasium](https://github.com/Farama-Foundation/Gymnasium)
+
+> The environment were tested with gymnasium 0.27
 
 ## Installation (Linux & MacOS)
 
@@ -48,3 +52,7 @@ for _ in range(100):
 
 env.close()
 ```
+
+## TODO:
+- [] Fix displacement clip (under `continuous` setting) 
+- [] Add time limit and truncated condition

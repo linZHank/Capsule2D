@@ -197,7 +197,7 @@ env = EscaperEnv(render_mode="human", continuous=True)
 obs, info = env.reset()
 for _ in range(1000):
     # o, r, d, t, i = env.step(env.action_space.sample())
-    o, r, d, t, i = env.step(np.array([-0.1, 0]))
+    o, r, d, t, i = env.step(np.array([-1, 0]))
     print(o, r, d, t, i)
     if d:
         env.reset()
