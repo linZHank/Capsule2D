@@ -54,5 +54,5 @@ env.close()
 ```
 
 ## TODO:
-- [] Fix displacement clip (under `continuous` setting) 
-- [] Add time limit and truncated condition
+- [ ] Fix displacement clip (under `continuous` setting) 
+- [ ] Add time limit and truncated condition
