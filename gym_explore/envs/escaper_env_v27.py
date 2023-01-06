@@ -89,11 +89,10 @@ class EscaperEnv(gym.Env):
     def step(self, action):
         # compute displacement
         if self.continuous:
-            np.clip(
+            action = np.clip(
                 action,
                 a_min=np.array([-0.2, -np.pi/4]),
                 a_max=np.array([0.2, np.pi/4]),
-                out=action,
             )
             vx = action[0]
             vth = action[1]
@@ -193,12 +192,16 @@ class EscaperEnv(gym.Env):
 
 
 # Uncomment following to test env
-env = EscaperEnv(render_mode="human", continuous=True)
-obs, info = env.reset()
-for _ in range(1000):
-    # o, r, d, t, i = env.step(env.action_space.sample())
-    o, r, d, t, i = env.step(np.array([-1, 0]))
-    print(o, r, d, t, i)
-    if d:
-        env.reset()
-env.close()
+# env = EscaperEnv(render_mode="human", continuous=True)
+# obs, info = env.reset()
+# # o, r, d, t, i = env.step(np.array([0, np.pi]))
+# # o, r, d, t, i = env.step(np.array([0, np.pi]))
+# for _ in range(1000):
+#     o, r, d, t, i = env.step(env.action_space.sample())
+#     # o, r, d, t, i = env.step(np.array([1, 0]))
+#     print(o, r, d, t, i)
+#     if d:
+#         env.reset()
+#         # o, r, d, t, i = env.step(np.array([0, np.pi]))
+#         # o, r, d, t, i = env.step(np.array([0, np.pi]))
+# env.close()

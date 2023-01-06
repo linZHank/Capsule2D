@@ -54,5 +54,7 @@ env.close()
 ```
 
 ## TODO:
-- [ ] Fix displacement clip (under `continuous` setting) 
+- [x] Fix action clip (under `continuous` setting) 
+- [ ] Add heading arrow
 - [ ] Add time limit and truncated condition
+- [ ] Add rgb_array rendering mode
