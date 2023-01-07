@@ -42,6 +42,17 @@ class EscaperEnv(gym.Env):
         self.render_mode = render_mode
         self._fig = None
         self._ax = None
+        # init fixed patches
+        outer_wall = Circle(xy=(0, 0), radius=8.0, fc="grey", ec=None)
+        inner_wall = Circle(xy=(0, 0), radius=7.0, fc="white", ec=None)
+        doorway = Wedge(
+            center=(0, 0), r=8.0, theta1=85.0, theta2=95, fc="white", ec=None
+        )
+        self._fixed_patches = [outer_wall, inner_wall, doorway]
+        if self.render_mode == "human":
+            self._fig = plt.figure(figsize=(8, 8))
+            self._ax = self._fig.add_subplot(111)
+
 
     def _get_obs(self):
         return self._agent_pose
@@ -56,14 +67,17 @@ class EscaperEnv(gym.Env):
 
     def reset(self, seed: Optional[int] = None, options: Optional[str] = None):
         super().reset(seed=seed)
+        # init
         self.step_counter = 0
         # reset escaper to origin or randomly
+        self._agent_traj = []
         self._agent_pose = np.zeros(3, dtype=np.float32)  # x, y, th
         if options == "random":
             x = np.random.uniform(low=-6.5, high=6.5)
             y = np.random.uniform(low=-6.5, high=6.5)
             th = np.random.uniform(low=-np.pi, high=np.pi)
             self._agent_pose = np.array([x, y, th], dtype=np.float32)
+        # self._agent_traj.append(self._agent_pose[:2].copy())
         self._agent_traj.append(self._agent_pose[:2].copy())
         # get obs and info
         self._agent_status = "trapped"
@@ -71,16 +85,6 @@ class EscaperEnv(gym.Env):
         info = self._get_info()
         # prepare renderer
         if self.render_mode == "human":
-            self.close()
-            self._fig = plt.figure(figsize=(8, 8))
-            self._ax = self._fig.add_subplot(111)
-            # init fixed patches
-            outer_wall = Circle(xy=(0, 0), radius=8.0, fc="grey", ec=None)
-            inner_wall = Circle(xy=(0, 0), radius=7.0, fc="white", ec=None)
-            doorway = Wedge(
-                center=(0, 0), r=8.0, theta1=85.0, theta2=95, fc="white", ec=None
-            )
-            self._fixed_patches = [outer_wall, inner_wall, doorway]
             # render
             self._render_frame()
 
@@ -109,6 +113,7 @@ class EscaperEnv(gym.Env):
         reward = None
         info = None
         # compute new position
+        # prev_pose = self._agent_pose.copy()
         prev_pose = self._agent_pose.copy()
         dx = vx * np.cos(prev_pose[-1])
         dy = vx * np.sin(prev_pose[-1])
@@ -126,6 +131,7 @@ class EscaperEnv(gym.Env):
             + self._agent_pose[1]
             - prev_pose[1]
         )  # |x0 - x1| + (y1 - y0)
+        # self._agent_traj.append(self._agent_pose[:2].copy())
         self._agent_traj.append(self._agent_pose[:2].copy())
         # check crash
         if self._fixed_patches[0].contains_point(self._agent_pose[:2], radius=0.1):
@@ -145,13 +151,15 @@ class EscaperEnv(gym.Env):
         return observation, reward, terminated, truncated, info
 
     def _render_frame(self):
+        if self._fig is None:
+            self._fig = plt.figure(figsize=(8, 8))
+            self._ax = self._fig.add_subplot(111)
         self._ax = self._fig.get_axes()[0]
         self._ax.cla()
         patch_list = []
         patch_list += self._fixed_patches
-        # add wall patches
+        # add patches
         escaper_pat = Circle(
-            # xy=(self.position[0], self.position[-1]),
             xy=(self._agent_pose[0], self._agent_pose[1]),
             radius=0.2,
             ec="blueviolet",
@@ -189,19 +197,24 @@ class EscaperEnv(gym.Env):
 
     def close(self):
         plt.close("all")
+        self._fig = None
+        self._ax = None
 
 
 # Uncomment following to test env
-# env = EscaperEnv(render_mode="human", continuous=True)
-# obs, info = env.reset()
-# # o, r, d, t, i = env.step(np.array([0, np.pi]))
-# # o, r, d, t, i = env.step(np.array([0, np.pi]))
-# for _ in range(1000):
-#     o, r, d, t, i = env.step(env.action_space.sample())
-#     # o, r, d, t, i = env.step(np.array([1, 0]))
-#     print(o, r, d, t, i)
-#     if d:
-#         env.reset()
-#         # o, r, d, t, i = env.step(np.array([0, np.pi]))
-#         # o, r, d, t, i = env.step(np.array([0, np.pi]))
-# env.close()
+env = EscaperEnv(render_mode="human", continuous=True)
+# env = EscaperEnv(continuous=True)
+obs, info = env.reset()
+# obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+# obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+for i in range(1000):
+    if i > 500:
+        env._render_frame()
+    obs, rew, term, trun, info = env.step(env.action_space.sample())
+    # obs, rew, term, trun, info = env.step(np.array([1, 0]))
+    print(obs, rew, term, trun, info)
+    if term:
+        env.reset()
+        # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+        # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+env.close()
