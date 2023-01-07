@@ -205,8 +205,8 @@ obs, info = env.reset()
 # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
 # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
 for i in range(1000):
-    if i > 500:
-        env._render_frame()
+    # if i > 500:
+    #     env._render_frame()
     obs, rew, term, trun, info = env.step(env.action_space.sample())
     # obs, rew, term, trun, info = env.step(np.array([1, 0]))
     print(obs, rew, term, trun, info)
