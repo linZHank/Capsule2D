@@ -55,6 +55,8 @@ env.close()
 
 ## TODO:
 - [x] Fix action clip (under `continuous` setting) 
-- [ ] Add heading arrow
+- [x] Use same figure window
+- [ ] Fix renderer get slower after a few hundred steps
 - [ ] Add time limit and truncated condition
+- [ ] Add heading arrow
 - [ ] Add rgb_array rendering mode

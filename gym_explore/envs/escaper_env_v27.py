@@ -77,7 +77,6 @@ class EscaperEnv(gym.Env):
             y = np.random.uniform(low=-6.5, high=6.5)
             th = np.random.uniform(low=-np.pi, high=np.pi)
             self._agent_pose = np.array([x, y, th], dtype=np.float32)
-        # self._agent_traj.append(self._agent_pose[:2].copy())
         self._agent_traj.append(self._agent_pose[:2].copy())
         # get obs and info
         self._agent_status = "trapped"
@@ -113,7 +112,6 @@ class EscaperEnv(gym.Env):
         reward = None
         info = None
         # compute new position
-        # prev_pose = self._agent_pose.copy()
         prev_pose = self._agent_pose.copy()
         dx = vx * np.cos(prev_pose[-1])
         dy = vx * np.sin(prev_pose[-1])
@@ -131,7 +129,6 @@ class EscaperEnv(gym.Env):
             + self._agent_pose[1]
             - prev_pose[1]
         )  # |x0 - x1| + (y1 - y0)
-        # self._agent_traj.append(self._agent_pose[:2].copy())
         self._agent_traj.append(self._agent_pose[:2].copy())
         # check crash
         if self._fixed_patches[0].contains_point(self._agent_pose[:2], radius=0.1):
