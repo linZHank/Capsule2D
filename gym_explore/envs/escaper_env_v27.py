@@ -53,7 +53,6 @@ class EscaperEnv(gym.Env):
             self._fig = plt.figure(figsize=(8, 8))
             self._ax = self._fig.add_subplot(111)
 
-
     def _get_obs(self):
         return self._agent_pose
 
@@ -94,8 +93,8 @@ class EscaperEnv(gym.Env):
         if self.continuous:
             action = np.clip(
                 action,
-                a_min=np.array([-0.2, -np.pi/4]),
-                a_max=np.array([0.2, np.pi/4]),
+                a_min=np.array([-0.2, -np.pi / 4]),
+                a_max=np.array([0.2, np.pi / 4]),
             )
             vx = action[0]
             vth = action[1]
@@ -118,9 +117,9 @@ class EscaperEnv(gym.Env):
         dth = vth
         self._agent_pose += np.array([dx, dy, dth])
         if self._agent_pose[-1] > np.pi:  # orientation within [-pi, pi]
-            self._agent_pose[-1] -= 2*np.pi
+            self._agent_pose[-1] -= 2 * np.pi
         elif self._agent_pose[-1] < -np.pi:
-            self._agent_pose[-1] += 2*np.pi
+            self._agent_pose[-1] += 2 * np.pi
         observation = self._get_obs()
         # compute reward
         reward = (
@@ -132,8 +131,12 @@ class EscaperEnv(gym.Env):
         self._agent_traj.append(self._agent_pose[:2].copy())
         # check crash
         if self._fixed_patches[0].contains_point(self._agent_pose[:2], radius=0.1):
-            if not self._fixed_patches[1].contains_point(self._agent_pose[:2], radius=0.1):
-                if not self._fixed_patches[2].contains_point(self._agent_pose[:2], radius=0.1):
+            if not self._fixed_patches[1].contains_point(
+                self._agent_pose[:2], radius=0.1
+            ):
+                if not self._fixed_patches[2].contains_point(
+                    self._agent_pose[:2], radius=0.1
+                ):
                     terminated = True
                     self._agent_status = "crash"
         else:
@@ -168,6 +171,16 @@ class EscaperEnv(gym.Env):
         )  # match_origin prevent PatchCollection mess up original color
         # plot patches
         self._ax.add_collection(pats)
+        # plot heading line
+        head_tip = self._agent_pose[0:2] + \
+            np.array(
+                [
+                    0.25 * np.cos(self._agent_pose[-1]),
+                    0.25 * np.sin(self._agent_pose[-1]),
+                ]
+            )
+        head_line = np.vstack((self._agent_pose[:2], head_tip))
+        self._ax.plot(head_line[:, 0], head_line[:, 1], "k", linewidth=1)
         # plot trajectory
         if self._agent_traj:
             traj_arr = np.array(self._agent_traj)

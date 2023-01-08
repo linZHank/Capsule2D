@@ -57,5 +57,5 @@ env.close()
 - [x] Fix action clip (under `continuous` setting).
 - [x] Use same figure window for every episode.
 - [ ] Add time limit and truncated condition.
-- [ ] Add heading arrow.
+- [x] Add heading arrow.
 - [ ] Add rgb_array rendering mode.
