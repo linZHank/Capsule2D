@@ -17,13 +17,11 @@ This repo contains a personal collection of
 
 - [Python3](https://www.python.org/)
 
-> The environments were tested in Python 3.10.8 Other versions of Python may work as well.
+> The environments were tested in Python 3.10.8. Other versions of Python may work as well.
 
 - [pip](https://pypi.org/project/pip/)
 - [Git](https://git-scm.com/)
 - [Gymnasium](https://github.com/Farama-Foundation/Gymnasium)
-
-> The environment were tested with gymnasium 0.27
 
 ## Installation (Linux & MacOS)
 
@@ -38,12 +36,13 @@ pip install -e gym-explore
 import gymnasium as gym
 import gym_explore
 
+
 env = gym.make('escaper-v0', render_mode="human", continuous=False)
 obs, info = env.reset()
 for i in range(1000):
     obs, rew, term, trun, info = env.step(env.action_space.sample())
     print(obs, rew, term, trun, info)
-    if term:
+    if term or trun:
         env.reset()
 env.close()
 ```
@@ -51,6 +50,7 @@ env.close()
 ## TODO:
 - [x] Fix action clip (under `continuous` setting).
 - [x] Use same figure window for every episode.
-- [ ] Add time limit and truncated condition.
+- [x] Add time limit and truncated condition.
 - [x] Add heading arrow.
+- [ ] Add a "stay" mode to `reset()`
 - [ ] Add rgb_array rendering mode.
