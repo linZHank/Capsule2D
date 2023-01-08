@@ -35,21 +35,16 @@ pip install -e gym-explore
 # Usage
 
 ```python
-import gym
-from gym.envs.registration import register
-register(
-    id='escaper-v0',
-    entry_point='gym_explore.envs:EscaperEnv',
-)
+import gymnasium as gym
+import gym_explore
 
-env = gym.make('escaper-v0', continuous=True)
-observation, info = env.reset(return_info=True)
-for _ in range(100):
-    env.render()
-    observation, reward, done, info = env.step(env.action_space.sample())
-    if done:
-        observation, info = env.reset(return_info=True)
-
+env = gym.make('escaper-v0', render_mode="human", continuous=False)
+obs, info = env.reset()
+for i in range(1000):
+    obs, rew, term, trun, info = env.step(env.action_space.sample())
+    print(obs, rew, term, trun, info)
+    if term:
+        env.reset()
 env.close()
 ```
 
