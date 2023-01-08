@@ -4,9 +4,10 @@ This project is originated from a course project which was introduced in
 University of Cincinnati's
 [AEEM6117](https://www.coursicle.com/uc/courses/AEEM/6117/) in 2021 Spring.
 
-Objective of this project is to explore auto exploration strategies for RL agent.
-This repo contains a personal collection of [OpenAI Gym](https://github.com/openai/gym) like environemnt rendered with [Matplotlib](https://matplotlib.org/)
-only.
+Objective of this project is to investigate RL agents' exploration strategies.
+This repo contains a personal collection of 
+[OpenAI Gym](https://github.com/openai/gym) like environemnt rendered with 
+[Matplotlib](https://matplotlib.org/) only.
 
 - Escaper-v0
 
@@ -16,10 +17,13 @@ only.
 
 - [Python3](https://www.python.org/)
 
-> The environments were tested in Python 3.10.2 Other versions of Python may work as well.
+> The environments were tested in Python 3.10.8 Other versions of Python may work as well.
 
 - [pip](https://pypi.org/project/pip/)
 - [Git](https://git-scm.com/)
+- [Gymnasium](https://github.com/Farama-Foundation/Gymnasium)
+
+> The environment were tested with gymnasium 0.27
 
 ## Installation (Linux & MacOS)
 
@@ -31,20 +35,22 @@ pip install -e gym-explore
 # Usage
 
 ```python
-import gym
-from gym.envs.registration import register
-register(
-    id='escaper-v0',
-    entry_point='gym_explore.envs:EscaperEnv',
-)
+import gymnasium as gym
+import gym_explore
 
-env = gym.make('escaper-v0', continuous=True)
-observation, info = env.reset(return_info=True)
-for _ in range(100):
-    env.render()
-    observation, reward, done, info = env.step(env.action_space.sample())
-    if done:
-        observation, info = env.reset(return_info=True)
-
+env = gym.make('escaper-v0', render_mode="human", continuous=False)
+obs, info = env.reset()
+for i in range(1000):
+    obs, rew, term, trun, info = env.step(env.action_space.sample())
+    print(obs, rew, term, trun, info)
+    if term:
+        env.reset()
 env.close()
 ```
+
+## TODO:
+- [x] Fix action clip (under `continuous` setting).
+- [x] Use same figure window for every episode.
+- [ ] Add time limit and truncated condition.
+- [x] Add heading arrow.
+- [ ] Add rgb_array rendering mode.

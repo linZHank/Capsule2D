@@ -4,7 +4,7 @@ setup(
     name='gym_explore',
     version='0.0.1',
     install_requires=[
-        'gym',
+        'gymnasium',
         'numpy',
         'matplotlib',
     ]
