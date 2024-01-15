@@ -212,19 +212,19 @@ class EscaperEnv(gym.Env):
 
 
 # Uncomment following to test env
-# env = EscaperEnv(render_mode="human", continuous=True)
-# # env = EscaperEnv(continuous=True)
-# obs, info = env.reset()
-# # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-# # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-# for i in range(1000):
-#     # if i > 500:
-#     #     env._render_frame()
-#     obs, rew, term, trun, info = env.step(env.action_space.sample())
-#     print(obs, rew, term, trun, info)
-#     # obs, rew, term, trun, info = env.step(np.array([1, 0]))
-#     if term:
-#         env.reset()
-#         # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-#         # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-# env.close()
+if __name__ == "__main__":
+    env = EscaperEnv(render_mode="human", continuous=True)
+    # env = EscaperEnv(continuous=True)
+    obs, info = env.reset()
+    # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+    for i in range(1000):
+        # if i > 500:
+        #     env._render_frame()
+        obs, rew, term, trun, info = env.step(env.action_space.sample())
+        # print(obs, rew, term, trun, info)
+        # obs, rew, term, trun, info = env.step(np.array([1, 0]))
+        if term:
+            env.reset()
+            # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+            # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+    env.close()
