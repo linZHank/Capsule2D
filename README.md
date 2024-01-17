@@ -6,16 +6,17 @@ University of Cincinnati's
 
 Objective of this project is to investigate RL agents' exploration strategies.
 This repo contains a personal collection of 
-[OpenAI Gym](https://github.com/openai/gym) like environment rendered with 
+[OpenAI Gym](https://github.com/openai/gym) like environemnt rendered with 
 [Matplotlib](https://matplotlib.org/) only.
 
 ## Installation (Linux & MacOS)
 ```shell
 git clone https://github.com/linzhank/gym-explore.git
-pip install -e gym-explore
+cd gym-explore
+pip install -e .
 ```
 
-# Usage
+## Usage
 
 ```python
 import gymnasium as gym
