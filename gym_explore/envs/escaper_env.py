@@ -20,8 +20,8 @@ class EscaperEnv(gym.Env):
         )
         if self.continuous:
             self.action_space = spaces.Box(
-                low=np.array([-0.2, -np.pi / 4]),
-                high=np.array([0.2, np.pi / 4]),
+                low=np.array([-0.4, -np.pi / 2]),
+                high=np.array([0.4, np.pi / 2]),
                 shape=(2,),
                 dtype=np.float32,
             )
@@ -99,9 +99,9 @@ class EscaperEnv(gym.Env):
             vx = action[0]
             vth = action[1]
         else:
-            assert self.action_space.contains(
-                action
-            ), f"{action!r} ({type(action)}) invalid "
+            assert self.action_space.contains(action), (
+                f"{action!r} ({type(action)}) invalid "
+            )
             vx = self.action_codebook[action][0]
             vth = self.action_codebook[action][1]
         # init returns
@@ -172,13 +172,12 @@ class EscaperEnv(gym.Env):
         # plot patches
         self._ax.add_collection(pats)
         # plot heading line
-        head_tip = self._agent_pose[0:2] + \
-            np.array(
-                [
-                    0.25 * np.cos(self._agent_pose[-1]),
-                    0.25 * np.sin(self._agent_pose[-1]),
-                ]
-            )
+        head_tip = self._agent_pose[0:2] + np.array(
+            [
+                0.25 * np.cos(self._agent_pose[-1]),
+                0.25 * np.sin(self._agent_pose[-1]),
+            ]
+        )
         head_line = np.vstack((self._agent_pose[:2], head_tip))
         self._ax.plot(head_line[:, 0], head_line[:, 1], "k", linewidth=1)
         # plot trajectory
