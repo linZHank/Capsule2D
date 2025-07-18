@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,39 +8,56 @@ import gymnasium as gym
 from gymnasium import spaces
 
 
+class Actions(Enum):
+    FORWARD_LEFT = 0
+    FORWARD_RIGHT = 1
+    BACKWARD_RIGHT = 2
+    BACKWARD_LEFT = 3
+
+
 # TODO: steps limit and truncated condition
-class EscaperEnv(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 50}
+class Breaker(gym.Env):
+    metadata = {"render_modes": ["human"], "render_fps": 60}
 
     def __init__(self, render_mode: Optional[str] = None, continuous: bool = False):
-        self.prev_reward = None
-        self.max_episode_steps = 1000
-        self.continuous = continuous
         self.observation_space = spaces.Box(
             low=-10.0, high=10.0, shape=(3,), dtype=np.float32
-        )
-        if self.continuous:
+        )  # agent pose: x, y, theta
+        if continuous:
             self.action_space = spaces.Box(
-                low=np.array([-0.2, -np.pi / 4]),
-                high=np.array([0.2, np.pi / 4]),
+                low=np.array([-0.4, -np.pi / 2]),
+                high=np.array([0.4, np.pi / 2]),
                 shape=(2,),
                 dtype=np.float32,
-            )
+            )  # agent cmd_vel: lin, ang
         else:
             self.action_space = spaces.Discrete(4)
             self.action_codebook = {
-                0: np.array([0.1, np.pi / 8]),  # linear, angular
-                1: np.array([0.1, -np.pi / 8]),
-                2: np.array([-0.1, np.pi / 8]),
-                3: np.array([-0.1, -np.pi / 8]),
+                Actions.FORWARD_LEFT.value: np.array(
+                    [0.1, np.pi / 12], dtype=np.float32
+                ),
+                Actions.FORWARD_RIGHT.value: np.array(
+                    [0.1, -np.pi / 12], dtype=np.float32
+                ),
+                Actions.BACKWARD_RIGHT.value: np.array(
+                    [-0.1, np.pi / 12], dtype=np.float32
+                ),
+                Actions.BACKWARD_LEFT.value: np.array(
+                    [-0.1, -np.pi / 12], dtype=np.float32
+                ),
             }
-        # vars
-        self._agent_pose = None
-        self._agent_traj = []
-        self._agent_status = None
-        # render mode
+        """
+        If human-rendering is used, `self.canvas` will be a reference
+        to the window that we draw to. `self.clock` will be a clock that is used
+        to ensure that the environment is rendered at the correct framerate in
+        human-mode. They will remain `None` until human-mode is used for the
+        first time.
+        """
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
+        self.canvas = None  #  _fig may substitute it
+        self.clock = None
+        # TODO: may need to move shapes initiation to _render_frame()
         self._fig = None
         self._ax = None
         # init fixed patches
@@ -52,6 +70,12 @@ class EscaperEnv(gym.Env):
         if self.render_mode == "human":
             self._fig = plt.figure(figsize=(8, 8))
             self._ax = self._fig.add_subplot(111)
+        # Env vars
+        self._max_episode_steps = 500
+        self._continuous = continuous
+        self._agent_pose = None
+        self._agent_traj = []
+        self._agent_status = None
 
     def _get_obs(self):
         return self._agent_pose
@@ -99,9 +123,9 @@ class EscaperEnv(gym.Env):
             vx = action[0]
             vth = action[1]
         else:
-            assert self.action_space.contains(
-                action
-            ), f"{action!r} ({type(action)}) invalid "
+            assert self.action_space.contains(action), (
+                f"{action!r} ({type(action)}) invalid "
+            )
             vx = self.action_codebook[action][0]
             vth = self.action_codebook[action][1]
         # init returns
@@ -172,13 +196,12 @@ class EscaperEnv(gym.Env):
         # plot patches
         self._ax.add_collection(pats)
         # plot heading line
-        head_tip = self._agent_pose[0:2] + \
-            np.array(
-                [
-                    0.25 * np.cos(self._agent_pose[-1]),
-                    0.25 * np.sin(self._agent_pose[-1]),
-                ]
-            )
+        head_tip = self._agent_pose[0:2] + np.array(
+            [
+                0.25 * np.cos(self._agent_pose[-1]),
+                0.25 * np.sin(self._agent_pose[-1]),
+            ]
+        )
         head_line = np.vstack((self._agent_pose[:2], head_tip))
         self._ax.plot(head_line[:, 0], head_line[:, 1], "k", linewidth=1)
         # plot trajectory
