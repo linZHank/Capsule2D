@@ -25,14 +25,14 @@ class Breaker(gym.Env):
         )  # agent pose: x, y, theta
         if continuous:
             self.action_space = spaces.Box(
-                low=np.array([-0.4, -np.pi / 2]),
-                high=np.array([0.4, np.pi / 2]),
+                low=np.array([-0.2, -np.pi / 6]),
+                high=np.array([0.2, np.pi / 6]),
                 shape=(2,),
                 dtype=np.float32,
             )  # agent cmd_vel: lin, ang
         else:
             self.action_space = spaces.Discrete(4)
-            self.action_codebook = {
+            self._action_codebook = {
                 Actions.FORWARD_LEFT.value: np.array(
                     [0.1, np.pi / 12], dtype=np.float32
                 ),
@@ -45,7 +45,7 @@ class Breaker(gym.Env):
                 Actions.BACKWARD_LEFT.value: np.array(
                     [-0.1, -np.pi / 12], dtype=np.float32
                 ),
-            }
+            }  # body frame: x pointing head, y pointing left
         """
         If human-rendering is used, `self.canvas` will be a reference
         to the window that we render to. `self.clock` will be a clock that is used
@@ -98,7 +98,7 @@ class Breaker(gym.Env):
                 low=(-6.5, -6.5, -np.pi),  # x, y, theta
                 high=(6.5, 6.5, np.pi),
                 size=(3,),
-            )
+            )  # TODO: parameterize range
             # x = np.random.uniform(low=-6.5, high=6.5)
             # y = np.random.uniform(low=-6.5, high=6.5)
             # th = np.random.uniform(low=-np.pi, high=np.pi)
@@ -116,47 +116,48 @@ class Breaker(gym.Env):
         return observation, info
 
     def step(self, action):
-        # compute displacement
-        if self.continuous:
-            action = np.clip(
-                action,
-                a_min=np.array([-0.2, -np.pi / 4]),
-                a_max=np.array([0.2, np.pi / 4]),
-            )
-            vx = action[0]
-            vth = action[1]
-        else:
-            assert self.action_space.contains(action), (
-                f"{action!r} ({type(action)}) invalid "
-            )
-            vx = self.action_codebook[action][0]
-            vth = self.action_codebook[action][1]
-        # init returns
+        assert self.action_space.contains(action), (
+            f"{action!r} ({type(action)}) invalid"
+        )
+        # Init returns
         observation = None
         terminated = False
         truncated = False
         reward = None
         info = None
-        # compute new position
-        prev_pose = self._agent_pose.copy()
-        dx = vx * np.cos(prev_pose[-1])
-        dy = vx * np.sin(prev_pose[-1])
-        dth = vth
-        self._agent_pose += np.array([dx, dy, dth])
-        if self._agent_pose[-1] > np.pi:  # orientation within [-pi, pi]
+        # Update agent pose
+        if self._continuous:
+            action = np.clip(
+                action,
+                a_min=self.action_space.low,
+                a_max=self.action_space.high,
+            )
+            vx = action[0]
+            vth = action[1]
+        else:
+            # vx = self.action_codebook[action][0]
+            # vth = self.action_codebook[action][1]
+            vx = self._action_codebook[action][0]
+            vth = self._action_codebook[action][1]  # rotate along z
+        last_pose = self._agent_pose.copy()
+        dx = vx * np.cos(last_pose[-1])  # dx = vx cos(theta) * dt
+        dy = vx * np.sin(last_pose[-1])  # dy = vx sin(theta) * dt
+        dth = vth  # dtheta = vtheta * dt, dt ignored
+        self._agent_pose += np.array((dx, dy, dth), dtype=np.float32)
+        if self._agent_pose[-1] > np.pi:  # orientation within (-pi, pi)
             self._agent_pose[-1] -= 2 * np.pi
         elif self._agent_pose[-1] < -np.pi:
             self._agent_pose[-1] += 2 * np.pi
         observation = self._get_obs()
-        # compute reward
+        # Reward: higher rewards if agent could lower |x| and increase y
         reward = (
-            np.abs(prev_pose[0])
+            np.abs(last_pose[0])
             - np.abs(self._agent_pose[0])
             + self._agent_pose[1]
-            - prev_pose[1]
-        )  # |x0 - x1| + (y1 - y0)
-        self._agent_traj.append(self._agent_pose[:2].copy())
-        # check crash
+            - last_pose[1]
+        )  # |x0| - |x1| + (y1 - y0)
+        self._agent_traj.append(self._agent_pose[:2].copy())  # track x, y
+        # Check crash
         if self._fixed_patches[0].contains_point(self._agent_pose[:2], radius=0.1):
             if not self._fixed_patches[1].contains_point(
                 self._agent_pose[:2], radius=0.1
@@ -165,9 +166,9 @@ class Breaker(gym.Env):
                     self._agent_pose[:2], radius=0.1
                 ):
                     terminated = True
-                    self._agent_status = "crash"
+                    self._agent_status = "crashed"
         else:
-            reward = 100.0
+            reward = 100.0  # escape reward
             terminated = True
             self._agent_status = "escaped"
         info = self._get_info()
@@ -239,17 +240,11 @@ class Breaker(gym.Env):
 
 # Uncomment following to test env
 if __name__ == "__main__":
-    env = Breaker()
+    env = Breaker(render_mode="human", continuous=False)
     obs, info = env.reset()
     # # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-    # for i in range(1000):
-    #     # if i > 500:
-    #     #     env._render_frame()
-    #     obs, rew, term, trun, info = env.step(env.action_space.sample())
-    #     # print(obs, rew, term, trun, info)
-    #     # obs, rew, term, trun, info = env.step(np.array([1, 0]))
-    #     if term:
-    #         env.reset()
-    #         # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-    #         # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-    # env.close()
+    for i in range(500):
+        obs, rew, term, trun, info = env.step(env.action_space.sample())
+        print(obs, rew, term, trun, info)
+        if term:
+            env.reset()
