@@ -9,7 +9,7 @@ from gymnasium import spaces
 
 # TODO: steps limit and truncated condition
 class EscaperEnv(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 50}
+    metadata = {"render_modes": ["human"], "render_fps": 60}
 
     def __init__(self, render_mode: Optional[str] = None, continuous: bool = False):
         self.prev_reward = None
@@ -28,10 +28,10 @@ class EscaperEnv(gym.Env):
         else:
             self.action_space = spaces.Discrete(4)
             self.action_codebook = {
-                0: np.array([0.1, np.pi / 8]),  # linear, angular
-                1: np.array([0.1, -np.pi / 8]),
-                2: np.array([-0.1, np.pi / 8]),
-                3: np.array([-0.1, -np.pi / 8]),
+                0: np.array([0.2, np.pi / 4]),  # linear, angular
+                1: np.array([0.2, -np.pi / 4]),
+                2: np.array([-0.2, np.pi / 4]),
+                3: np.array([-0.2, -np.pi / 4]),
             }
         # vars
         self._agent_pose = None
@@ -93,8 +93,8 @@ class EscaperEnv(gym.Env):
         if self.continuous:
             action = np.clip(
                 action,
-                a_min=np.array([-0.2, -np.pi / 4]),
-                a_max=np.array([0.2, np.pi / 4]),
+                a_min=np.array([-0.4, -np.pi / 2]),
+                a_max=np.array([0.4, np.pi / 2]),
             )
             vx = action[0]
             vth = action[1]
