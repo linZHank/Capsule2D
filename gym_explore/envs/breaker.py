@@ -48,14 +48,14 @@ class Breaker(gym.Env):
             }
         """
         If human-rendering is used, `self.canvas` will be a reference
-        to the window that we draw to. `self.clock` will be a clock that is used
+        to the window that we render to. `self.clock` will be a clock that is used
         to ensure that the environment is rendered at the correct framerate in
         human-mode. They will remain `None` until human-mode is used for the
         first time.
         """
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
-        self.canvas = None  #  _fig may substitute it
+        self.canvas = None  #  _fig may substitute
         self.clock = None
         # TODO: may need to move shapes initiation to _render_frame()
         self._fig = None
@@ -74,8 +74,8 @@ class Breaker(gym.Env):
         self._max_episode_steps = 500
         self._continuous = continuous
         self._agent_pose = None
-        self._agent_traj = []
         self._agent_status = None
+        self._agent_traj = []
 
     def _get_obs(self):
         return self._agent_pose
@@ -90,16 +90,19 @@ class Breaker(gym.Env):
 
     def reset(self, seed: Optional[int] = None, options: Optional[str] = None):
         super().reset(seed=seed)
-        # init
-        self.step_counter = 0
         # reset escaper to origin or randomly
         self._agent_traj = []
         self._agent_pose = np.zeros(3, dtype=np.float32)  # x, y, th
         if options == "random":
-            x = np.random.uniform(low=-6.5, high=6.5)
-            y = np.random.uniform(low=-6.5, high=6.5)
-            th = np.random.uniform(low=-np.pi, high=np.pi)
-            self._agent_pose = np.array([x, y, th], dtype=np.float32)
+            self._agent_pose = self.np_random.uniform(
+                low=(-6.5, -6.5, -np.pi),  # x, y, theta
+                high=(6.5, 6.5, np.pi),
+                size=(3,),
+            )
+            # x = np.random.uniform(low=-6.5, high=6.5)
+            # y = np.random.uniform(low=-6.5, high=6.5)
+            # th = np.random.uniform(low=-np.pi, high=np.pi)
+            # self._agent_pose = np.array([x, y, th], dtype=np.float32)
         self._agent_traj.append(self._agent_pose[:2].copy())
         # get obs and info
         self._agent_status = "trapped"
@@ -236,18 +239,17 @@ class Breaker(gym.Env):
 
 # Uncomment following to test env
 if __name__ == "__main__":
-    env = EscaperEnv(render_mode="human", continuous=True)
-    # env = EscaperEnv(continuous=True)
+    env = Breaker()
     obs, info = env.reset()
-    # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-    for i in range(1000):
-        # if i > 500:
-        #     env._render_frame()
-        obs, rew, term, trun, info = env.step(env.action_space.sample())
-        # print(obs, rew, term, trun, info)
-        # obs, rew, term, trun, info = env.step(np.array([1, 0]))
-        if term:
-            env.reset()
-            # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-            # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
-    env.close()
+    # # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+    # for i in range(1000):
+    #     # if i > 500:
+    #     #     env._render_frame()
+    #     obs, rew, term, trun, info = env.step(env.action_space.sample())
+    #     # print(obs, rew, term, trun, info)
+    #     # obs, rew, term, trun, info = env.step(np.array([1, 0]))
+    #     if term:
+    #         env.reset()
+    #         # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+    #         # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
+    # env.close()
