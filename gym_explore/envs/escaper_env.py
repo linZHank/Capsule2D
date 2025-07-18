@@ -28,10 +28,10 @@ class EscaperEnv(gym.Env):
         else:
             self.action_space = spaces.Discrete(4)
             self.action_codebook = {
-                0: np.array([0.2, np.pi / 4]),  # linear, angular
-                1: np.array([0.2, -np.pi / 4]),
-                2: np.array([-0.2, np.pi / 4]),
-                3: np.array([-0.2, -np.pi / 4]),
+                0: np.array([0.2, np.pi / 8]),  # linear, angular
+                1: np.array([0.2, -np.pi / 8]),
+                2: np.array([-0.2, np.pi / 8]),
+                3: np.array([-0.2, -np.pi / 8]),
             }
         # vars
         self._agent_pose = None
