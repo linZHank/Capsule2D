@@ -1,0 +1,17 @@
+[project]
+name = "gym-explore"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "linzhanguca", email = "lzhang12@uca.edu" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "gymnasium>=1.2.0",
+    "matplotlib>=3.10.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
