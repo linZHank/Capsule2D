@@ -85,6 +85,7 @@ class Breaker(gym.Env):
     def reset(self, seed: Optional[int] = None, options: Optional[str] = None):
         super().reset(seed=seed)
         # reset escaper to origin or randomly
+        self._step_counts = 0
         self._agent_traj = []
         self._agent_pose = np.zeros(3, dtype=np.float32)  # x, y, th
         if options == "random":
@@ -115,6 +116,7 @@ class Breaker(gym.Env):
         truncated = False
         reward = None
         info = None
+        self._step_counts += 1
         # Update agent pose
         if self._continuous:
             action = np.clip(
@@ -145,7 +147,7 @@ class Breaker(gym.Env):
             - last_pose[1]
         )  # |x0| - |x1| + (y1 - y0)
         self._agent_traj.append(self._agent_pose[:2].copy())  # track x, y
-        # Check crash
+        # Check termination
         if self._fixed_patches[0].contains_point(self._agent_pose[:2], radius=0.1):
             if not self._fixed_patches[1].contains_point(
                 self._agent_pose[:2], radius=0.1
@@ -159,6 +161,8 @@ class Breaker(gym.Env):
             reward = 100.0  # escape reward
             terminated = True
             self._agent_status = "escaped"
+        if self._step_counts >= self._max_episode_steps:
+            truncated = True
         info = self._get_info()
         # render
         if self.render_mode == "human":
