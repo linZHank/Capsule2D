@@ -17,9 +17,9 @@ class Actions(Enum):
 
 # TODO: steps limit and truncated condition
 class Breaker(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 60}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 60}
 
-    def __init__(self, render_mode: Optional[str] = None, continuous: bool = False):
+    def __init__(self, render_mode: str = "rgb_array", continuous: bool = False):
         self.observation_space = spaces.Box(
             low=-10.0, high=10.0, shape=(3,), dtype=np.float32
         )  # agent pose: x, y, theta
@@ -55,27 +55,21 @@ class Breaker(gym.Env):
         """
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
-        self.canvas = None  #  _fig may substitute
-        self.clock = None
-        # TODO: may need to move shapes initiation to _render_frame()
-        self._fig = None
-        self._ax = None
-        # init fixed patches
+        # Init fixed patches
         outer_wall = Circle(xy=(0, 0), radius=8.0, fc="grey", ec=None)
         inner_wall = Circle(xy=(0, 0), radius=7.0, fc="white", ec=None)
         doorway = Wedge(
             center=(0, 0), r=8.0, theta1=85.0, theta2=95, fc="white", ec=None
         )
         self._fixed_patches = [outer_wall, inner_wall, doorway]
-        if self.render_mode == "human":
-            self._fig = plt.figure(figsize=(8, 8))
-            self._ax = self._fig.add_subplot(111)
         # Env vars
         self._max_episode_steps = 500
         self._continuous = continuous
         self._agent_pose = None
         self._agent_status = None
         self._agent_traj = []
+        self._fig = None
+        self._ax = None
 
     def _get_obs(self):
         return self._agent_pose
@@ -99,10 +93,6 @@ class Breaker(gym.Env):
                 high=(6.5, 6.5, np.pi),
                 size=(3,),
             )  # TODO: parameterize range
-            # x = np.random.uniform(low=-6.5, high=6.5)
-            # y = np.random.uniform(low=-6.5, high=6.5)
-            # th = np.random.uniform(low=-np.pi, high=np.pi)
-            # self._agent_pose = np.array([x, y, th], dtype=np.float32)
         self._agent_traj.append(self._agent_pose[:2].copy())
         # get obs and info
         self._agent_status = "trapped"
@@ -135,8 +125,6 @@ class Breaker(gym.Env):
             vx = action[0]
             vth = action[1]
         else:
-            # vx = self.action_codebook[action][0]
-            # vth = self.action_codebook[action][1]
             vx = self._action_codebook[action][0]
             vth = self._action_codebook[action][1]  # rotate along z
         last_pose = self._agent_pose.copy()
@@ -178,7 +166,7 @@ class Breaker(gym.Env):
 
         return observation, reward, terminated, truncated, info
 
-    def _render_frame(self):
+    def _render_frame(self):  # TODO: rgb_array
         if self._fig is None:
             self._fig = plt.figure(figsize=(8, 8))
             self._ax = self._fig.add_subplot(111)
@@ -227,22 +215,16 @@ class Breaker(gym.Env):
         plt.pause(1 / self.metadata["render_fps"])
         self._fig.show()
 
-    # TODO: for future usage
-    # def render(self):
-    #     if self.render_mode == "rgb_array":
-    #         return self._render_frame()
-
     def close(self):
-        plt.close("all")
         self._fig = None
         self._ax = None
+        plt.close("all")
 
 
 # Uncomment following to test env
 if __name__ == "__main__":
-    env = Breaker(render_mode="human", continuous=False)
+    env = Breaker(render_mode="rgb_array", continuous=True)
     obs, info = env.reset()
-    # # obs, rew, term, trun, info = env.step(np.array([0, np.pi]))
     for i in range(500):
         obs, rew, term, trun, info = env.step(env.action_space.sample())
         print(obs, rew, term, trun, info)
