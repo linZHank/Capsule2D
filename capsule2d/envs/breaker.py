@@ -89,11 +89,16 @@ class Breaker(gym.Env):
         self._agent_traj = []
         self._agent_pose = np.zeros(3, dtype=np.float32)  # x, y, th
         if options == "random":
-            self._agent_pose = self.np_random.uniform(
-                low=(-6.5, -6.5, -np.pi),  # x, y, theta
-                high=(6.5, 6.5, np.pi),
-                size=(3,),
-            )  # TODO: parameterize range
+            rho = np.random.uniform(6.5)
+            alpha = np.random.uniform(low=-np.pi, high=np.pi)
+            self._agent_pose = np.array(
+                (
+                    rho * np.cos(alpha),
+                    rho * np.sin(alpha),
+                    np.random.uniform(-np.pi, np.pi),
+                ),
+                dtype=np.float32,
+            )
         self._agent_traj.append(self._agent_pose[:2].copy())
         # get obs and info
         self._agent_status = "trapped"
