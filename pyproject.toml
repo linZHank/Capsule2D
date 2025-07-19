@@ -8,3 +8,8 @@ dependencies = [
     "gymnasium>=1.2.0",
     "matplotlib>=3.10.3",
 ]
+
+[dependency-groups]
+dev = [
+    "pyqt6>=6.9.1",
+]
