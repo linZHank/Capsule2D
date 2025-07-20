@@ -77,8 +77,9 @@ class Breaker(gym.Env):
     def _get_info(self):
         return {
             "distance to exit": np.linalg.norm(
-                self._agent_pose[:2] - np.array([0.0, 8.0]), ord=2
-            ),
+                self._agent_pose[:2] - np.array([0.0, 8.0]),
+                ord=2,
+            ).astype(np.float32),
             "status": self._agent_status,
         }
 
@@ -87,18 +88,22 @@ class Breaker(gym.Env):
         # reset escaper to origin or randomly
         self._step_counts = 0
         self._agent_traj = []
-        self._agent_pose = np.zeros(3, dtype=np.float32)  # x, y, th
         if options == "random":
-            rho = np.random.uniform(6.5)
-            alpha = np.random.uniform(low=-np.pi, high=np.pi)
-            self._agent_pose = np.array(
-                (
-                    rho * np.cos(alpha),
-                    rho * np.sin(alpha),
-                    np.random.uniform(-np.pi, np.pi),
+            self._agent_pose = self.np_random.uniform(
+                low=(
+                    -6.8 * np.cos(np.pi / 4),
+                    -6.8 * np.cos(np.pi / 4),
+                    -np.pi,
                 ),
-                dtype=np.float32,
+                high=(
+                    6.8 * np.cos(np.pi / 4),
+                    6.8 * np.cos(np.pi / 4),
+                    np.pi,
+                ),
+                size=(3,),
             )
+        else:
+            self._agent_pose = np.zeros(3, dtype=np.float32)  # x, y, th
         self._agent_traj.append(self._agent_pose[:2].copy())
         # get obs and info
         self._agent_status = "trapped"
@@ -112,9 +117,6 @@ class Breaker(gym.Env):
         return observation, info
 
     def step(self, action):
-        assert self.action_space.contains(action), (
-            f"{action!r} ({type(action)}) invalid"
-        )
         # Init returns
         observation = None
         terminated = False
@@ -128,17 +130,21 @@ class Breaker(gym.Env):
                 action,
                 a_min=self.action_space.low,
                 a_max=self.action_space.high,
+                dtype=self.action_space.dtype,
             )
             vx = action[0]
             vth = action[1]
         else:
             vx = self._action_codebook[action][0]
             vth = self._action_codebook[action][1]  # rotate along z
+        assert self.action_space.contains(action), (
+            f"{action!r} ({type(action)}) invalid"
+        )
         last_pose = self._agent_pose.copy()
         dx = vx * np.cos(last_pose[-1])  # dx = vx cos(theta) * dt
         dy = vx * np.sin(last_pose[-1])  # dy = vx sin(theta) * dt
         dth = vth  # dtheta = vtheta * dt, dt ignored
-        self._agent_pose += np.array((dx, dy, dth), dtype=np.float32)
+        self._agent_pose += np.array((dx, dy, dth), dtype=np.float32).copy()
         if self._agent_pose[-1] > np.pi:  # orientation within (-pi, pi)
             self._agent_pose[-1] -= 2 * np.pi
         elif self._agent_pose[-1] < -np.pi:
@@ -153,12 +159,12 @@ class Breaker(gym.Env):
         )  # |x0| - |x1| + (y1 - y0)
         self._agent_traj.append(self._agent_pose[:2].copy())  # track x, y
         # Check termination
-        if self._fixed_patches[0].contains_point(self._agent_pose[:2], radius=0.1):
+        if self._fixed_patches[0].contains_point(self._agent_pose[:2], radius=0.01):
             if not self._fixed_patches[1].contains_point(
-                self._agent_pose[:2], radius=0.1
+                self._agent_pose[:2], radius=0.01
             ):
                 if not self._fixed_patches[2].contains_point(
-                    self._agent_pose[:2], radius=0.1
+                    self._agent_pose[:2], radius=0.01
                 ):
                     terminated = True
                     self._agent_status = "crashed"
@@ -232,10 +238,22 @@ class Breaker(gym.Env):
 
 # Uncomment following to test env
 if __name__ == "__main__":
-    env = Breaker(render_mode="rgb_array", continuous=True)
-    obs, info = env.reset()
-    for i in range(500):
-        obs, rew, term, trun, info = env.step(env.action_space.sample())
-        print(obs, rew, term, trun, info)
-        if term:
-            env.reset()
+    env = Breaker(render_mode="human", continuous=True)
+    last_obs, info = env.reset()
+    for i in range(1000):  # test 2 espisodes
+        act = env.action_space.sample()
+        next_obs, rew, term, trunc, info = env.step(act)
+        # Step statistics
+        print("\n")
+        print(f"last observation: {last_obs}")
+        print(f"action: {act}")
+        print(f"next observation: {next_obs}")
+        print(f"reward: {rew}")
+        print(f"episode terminated: {term}")
+        print(f"episode truncated: {trunc}")
+        print(f"info: {info}")
+        print("\n")
+        last_obs = next_obs.copy()
+        if term or trunc:
+            env.reset(options="random")
+    env.close()
